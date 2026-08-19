@@ -1248,6 +1248,11 @@ opts_update = (
     + []
 )
 
+# "update-format"
+opts_update_format = \
+    opts_table_li_recurse + \
+    []
+
 # "apply-hot-fix"
 opts_apply_hot_fix = (
     opts_table_beopts + opts_table_nqv + opts_table_li_recurse + []
@@ -1411,6 +1416,7 @@ pkg_op_opts = {
     pkgdefs.PKG_OP_UNINSTALL: opts_uninstall,
     pkgdefs.PKG_OP_UNSET_PUBLISHER: None,
     pkgdefs.PKG_OP_UPDATE: opts_update,
+    pkgdefs.PKG_OP_UPDATE_FORMAT: opts_update_format,
     pkgdefs.PKG_OP_APPLY_HOT_FIX: opts_apply_hot_fix,
     pkgdefs.PKG_OP_VERIFY: opts_verify,
 }

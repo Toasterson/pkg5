@@ -296,6 +296,7 @@ pkg \- Image Packaging System retrieval client
 .LP
 .nf
 /usr/bin/pkg update-format
+    [-R | -r [[-z \fIzonename\fR]... | [-Z \fIzonename\fR]... ]]
 .fi
 
 .LP
@@ -3015,11 +3016,17 @@ Rebuild the index used by \fBpkg search\fR. This is a recovery operation not int
 .ne 2
 .mk
 .na
-\fB\fBpkg update-format\fR\fR
+\fB\fBpkg update-format\fR [\fB-R\fR | \fB-r\fR [[\fB-z\fR \fIzonename\fR]... | [\fB-Z\fR \fIzonename\fR]... ]]\fR
 .ad
 .sp .6
 .RS 4n
 Update the format of the image to the current version. Once this operation has completed, the image can no longer be used with older versions of the \fBpkg\fR(7) system.
+.sp
+.LP
+With \fB-r\fR, also update the format of any linked child images, such as installed non-global zones. The set of child images can be limited with the \fB-z\fR option, which can be specified multiple times to select the zones to be updated, or the \fB-Z\fR option, which can be specified multiple times to exclude zones from the update.
+.sp
+.LP
+Recursion can be enabled by default via the \fBdefault-recurse\fR image property; if this is set then it is not necessary to specify the \fB-r\fR option manually, and the \fB-R\fR option can be specified to disable recursion for this invocation. Refer to \fBdefault-recurse\fR in the "Package Properties" section for more information.
 .RE
 
 .sp
@@ -3359,7 +3366,7 @@ Default value: \fBalways\fR
 .ad
 .sp .6
 .RS 4n
-(boolean) If set to \fBTrue\fR, the package client will default to recursing into child \fBipkg\fR images as if the \fB-r\fR option had been provided. This behaviour can be overriden via the \fB-R\fR option.
+(boolean) If set to \fBTrue\fR, the package client will default to recursing into child \fBipkg\fR images for \fBpkg update\fR, \fBpkg update-format\fR and the other operations which accept the \fB-R\fR option, as if the \fB-r\fR option had been provided. This behaviour can be overriden via the \fB-R\fR option.
 
 .sp
 Default value: \fBFalse\fR
