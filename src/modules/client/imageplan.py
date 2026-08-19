@@ -260,8 +260,10 @@ class ImagePlan(object):
             # can't skip preexecute since we already preexecuted it
             return
 
-        if self.image.version != self.image.CURRENT_VERSION:
-            # Prevent plan execution if image format isn't current.
+        if self.image.version < 4:
+            # Prevent plan execution if the image format is too old
+            # to be written; version 4 images remain fully
+            # functional without an on-disk format upgrade.
             raise api_errors.ImageFormatUpdateNeeded(self.image.root)
 
         if self.image.transport:
@@ -756,7 +758,7 @@ class ImagePlan(object):
 
             # instantiate solver
             solver = pkg_solver.PkgSolver(
-                self.image.get_catalog(self.image.IMG_CATALOG_KNOWN),
+                self.image.get_solver_catalog(),
                 installed_dict,
                 pub_ranks,
                 variants,
@@ -1360,7 +1362,7 @@ class ImagePlan(object):
         def solver_cb(ignore_inst_parent_deps):
             # instantiate solver
             solver = pkg_solver.PkgSolver(
-                self.image.get_catalog(self.image.IMG_CATALOG_KNOWN),
+                self.image.get_solver_catalog(),
                 installed_dict,
                 self.image.get_publisher_ranks(),
                 self.image.get_variants(),
@@ -1441,7 +1443,7 @@ class ImagePlan(object):
         def solver_cb(ignore_inst_parent_deps):
             # instantiate solver
             solver = pkg_solver.PkgSolver(
-                self.image.get_catalog(self.image.IMG_CATALOG_KNOWN),
+                self.image.get_solver_catalog(),
                 installed_dict,
                 pub_ranks,
                 self.image.get_variants(),
@@ -5453,8 +5455,10 @@ class ImagePlan(object):
             self.pd.state = plandesc.PREEXECUTED_OK
             return
 
-        if self.image.version != self.image.CURRENT_VERSION:
-            # Prevent plan execution if image format isn't current.
+        if self.image.version < 4:
+            # Prevent plan execution if the image format is too old
+            # to be written; version 4 images remain fully
+            # functional without an on-disk format upgrade.
             raise api_errors.ImageFormatUpdateNeeded(self.image.root)
 
         if DebugValues["plandesc_validate"]:
