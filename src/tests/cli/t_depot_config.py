@@ -31,12 +31,17 @@ if __name__ == "__main__":
 import pkg5unittest
 
 import copy
+import importlib.machinery
+import importlib.util
 import os
 import six
 import time
 import unittest
+from unittest import mock
 import certgenerator
 import shutil
+import sys
+import types
 from six.moves import http_client
 from six.moves.urllib.error import HTTPError
 from six.moves.urllib.parse import quote
@@ -46,6 +51,104 @@ from pkg.client.debugvalues import DebugValues
 import pkg.fmri
 
 HTTPDEPOT_USER = "pkg5srv"
+
+
+class TestDepotConfigOpenSSL(pkg5unittest.Pkg5TestCase):
+        """Removed auto-TLS APIs must not prevent HTTP/static configuration."""
+
+        def load_depot_config(self):
+                path = os.path.join(pkg5unittest.g_pkg_path,
+                    "usr/lib/pkg.depot-config")
+                loader = importlib.machinery.SourceFileLoader(
+                    "depot_config_openssl_test", path)
+                spec = importlib.util.spec_from_loader(loader.name, loader)
+                module = importlib.util.module_from_spec(spec)
+                loader.exec_module(module)
+                module._ = lambda value: value
+                return module
+
+        def crypto_without_extensions(self):
+                import OpenSSL.crypto
+                crypto = types.ModuleType("OpenSSL.crypto")
+                for name in ("TYPE_RSA", "TYPE_DSA", "PKey", "load_privatekey",
+                    "dump_privatekey", "load_certificate", "dump_certificate",
+                    "X509", "FILETYPE_PEM"):
+                        setattr(crypto, name, getattr(OpenSSL.crypto, name))
+                return crypto
+
+        def test_help_and_static_responses_without_extensions(self):
+                crypto = self.crypto_without_extensions()
+                with mock.patch.dict(sys.modules, {"OpenSSL.crypto": crypto}):
+                        module = self.load_depot_config()
+                        with mock.patch.object(sys, "argv",
+                            ["pkg.depot-config", "--help"]), \
+                            mock.patch.object(module, "msg") as output:
+                                with self.assertRaises(SystemExit) as result:
+                                        module.main_func()
+                                self.assertEqual(result.exception.code, 2)
+                                self.assertIn("pkg.depot-config", output.call_args[0][0])
+                        module._write_versions_response(self.test_root,
+                            fragment=True)
+                        module._write_status_response({"publishers": {}},
+                            self.test_root, "example/")
+                        self.assertTrue(os.path.isfile(os.path.join(
+                            self.test_root, "versions/0/index.html")))
+                        self.assertTrue(os.path.isfile(os.path.join(
+                            self.test_root, "example/status/0/index.html")))
+
+        def test_missing_extension_fails_before_key_or_file_creation(self):
+                crypto = self.crypto_without_extensions()
+                cert_path = os.path.join(self.test_root, "server.pem")
+                key_path = os.path.join(self.test_root, "server.key")
+                with mock.patch.dict(sys.modules, {"OpenSSL.crypto": crypto}):
+                        module = self.load_depot_config()
+                        with mock.patch.object(module, "PKey") as key:
+                                with self.assertRaises(module.DepotException) as result:
+                                        module._createCertificateKey(1,
+                                            "localhost", 0, 3600, cert_path,
+                                            key_path)
+                                self.assertIn("--cert and --key",
+                                    str(result.exception))
+                                key.assert_not_called()
+                self.assertFalse(os.path.exists(cert_path))
+                self.assertFalse(os.path.exists(key_path))
+
+        def test_legacy_extension_keeps_ca_and_server_generation(self):
+                crypto = self.crypto_without_extensions()
+                crypto.X509Extension = mock.Mock(return_value=object())
+                with mock.patch.dict(sys.modules, {"OpenSSL.crypto": crypto}):
+                        module = self.load_depot_config()
+                        for server in (False, True):
+                                with self.subTest(server=server):
+                                        cert_path = os.path.join(self.test_root,
+                                            "cert-{0}.pem".format(server))
+                                        key_path = os.path.join(self.test_root,
+                                            "key-{0}.pem".format(server))
+                                        issuer_key = object() if server else None
+                                        issuer_cert = mock.Mock() if server else None
+                                        with mock.patch.object(module, "PKey") as key, \
+                                            mock.patch.object(module, "X509") as cert, \
+                                            mock.patch.object(module, "dump_certificate",
+                                                return_value=b"certificate"), \
+                                            mock.patch.object(module, "dump_privatekey",
+                                                return_value=b"private-key"):
+                                                module._createCertificateKey(1,
+                                                    "localhost", 0, 3600,
+                                                    cert_path, key_path,
+                                                    issuerCert=issuer_cert,
+                                                    issuerKey=issuer_key)
+                                                key.return_value.generate_key.assert_called_once_with(
+                                                    module.TYPE_RSA, 1024)
+                                                crypto.X509Extension.assert_called_with(
+                                                    b"basicConstraints", True,
+                                                    b"CA:FALSE" if server else b"CA:TRUE")
+                                                cert.return_value.sign.assert_called_once_with(
+                                                    issuer_key if server else key.return_value,
+                                                    "sha256")
+                                        with open(cert_path, "rb") as stream:
+                                                self.assertEqual(stream.read(), b"certificate")
+                                        with open(key_path, "rb") as stream:
+                                                self.assertEqual(stream.read(), b"private-key")
 
 
 class _Apache(object):
@@ -1089,11 +1192,20 @@ class TestHttpsDepot(_Apache, pkg5unittest.HTTPSTestClass):
                         shutil.rmtree(cert_key_dir)
 
                 cache_dir = os.path.join(self.test_root, "cache_test_dir")
-                self.depotconfig("-l {0} -r {1} -c {2} -d usr={3} -d spa={4} -p {5} "
+                command = ("-l {0} -r {1} -c {2} -d usr={3} -d spa={4} -p {5} "
                     "--https -T {6} -h localhost --cert-key-dir {7}".format(
                     self.default_depot_runtime, self.default_depot_runtime,
                     cache_dir, self.rdir1, self.rdir2, self.depot_port,
                     self.depot_template_dir, cert_key_dir))
+                try:
+                        from OpenSSL.crypto import X509Extension
+                except ImportError:
+                        unused_ret, unused_output, err = self.depotconfig(
+                            command, out=True, stderr=True, exit=1)
+                        self.assertIn("--cert and --key", err)
+                        self.assertFalse(os.listdir(cert_key_dir))
+                        return
+                self.depotconfig(command)
                 server_id = "localhost_{0}".format(self.depot_port)
                 ca_cert_file = os.path.join(cert_key_dir, "ca_{0}_cert.pem".format(
                     server_id))
@@ -1215,13 +1327,23 @@ class TestHttpsDepot(_Apache, pkg5unittest.HTTPSTestClass):
                 ta_key_file = os.path.join(cg.keys_dir, "ta_key.pem")
 
                 cache_dir = os.path.join(self.test_root, "cache_test_dir")
-                self.depotconfig("-l {0} -r {1} -c {2} -d usr={3} -d spa={4} -p {5} "
+                command = ("-l {0} -r {1} -c {2} -d usr={3} -d spa={4} -p {5} "
                     "--https -T {6} -h localhost --ca-cert {7} --ca-key {8} "
                     "--cert-key-dir {9}".format(
                     self.default_depot_runtime, self.default_depot_runtime,
                     cache_dir, self.rdir1, self.rdir2, self.depot_port,
                     self.depot_template_dir, ta_cert_file, ta_key_file,
                     cert_key_dir))
+                try:
+                        from OpenSSL.crypto import X509Extension
+                except ImportError:
+                        unused_ret, unused_output, err = self.depotconfig(
+                            command, out=True, stderr=True, exit=1)
+                        self.assertIn("--cert and --key", err)
+                        self.assertFalse(any(name.startswith("server_")
+                            for name in os.listdir(cert_key_dir)))
+                        return
+                self.depotconfig(command)
 
                 DebugValues["ssl_ca_file"] = ta_cert_file
 

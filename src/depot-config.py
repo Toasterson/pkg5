@@ -42,7 +42,7 @@ import warnings
 
 from mako.template import Template
 from mako.lookup import TemplateLookup
-from OpenSSL.crypto import TYPE_RSA, TYPE_DSA, PKey, load_privatekey, dump_privatekey, load_certificate, dump_certificate, X509, X509Extension, FILETYPE_PEM
+from OpenSSL.crypto import TYPE_RSA, TYPE_DSA, PKey, load_privatekey, dump_privatekey, load_certificate, dump_certificate, X509, FILETYPE_PEM
 
 import pkg
 import pkg.client.api_errors as apx
@@ -417,6 +417,14 @@ def _createCertificateKey(serial, CN, starttime, endtime,
 
         'digest' is the digestion method to use for signing.
         """
+
+        # HTTP fragments and supplied certificates do not need this legacy API.
+        try:
+                from OpenSSL.crypto import X509Extension
+        except ImportError as err:
+                raise DepotException(_("Automatic HTTPS certificate generation "
+                    "is unavailable with this PyOpenSSL version; supply "
+                    "--cert and --key instead.")) from err
 
         key = PKey()
         key.generate_key(key_type, key_bits)
