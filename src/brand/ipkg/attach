@@ -382,24 +382,6 @@ else
     incorp_list=gz_incorporations
 fi
 
-# Some packages have been renamed and as a result the old package name does
-# not appear in the 'entire' manifest. Requesting an update of just 'entire'
-# (as attach does) will then cause a conflict since the renamed package will
-# conflict with the old package and the old package is not selected for
-# upgrade. So, for known packages in this state, ensure that, if they are
-# installed in the zone then they are included in the list of packages to
-# update.
-for pkg in \
-	runtime/python-26 \
-	system/library/gcc-5-runtime \
-	system/library/g++-5-runtime \
-	system/library/gcc-6-runtime \
-	system/library/g++-6-runtime \
-; do
-	lc_pkg list -q pkg://omnios/$pkg && \
-		incorp_list="$incorp_list pkg://omnios/$pkg"
-done
-
 #
 # If there is a cache, use it.
 #

@@ -14,10 +14,10 @@
 # }}}
 
 #
-# Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 #
 
-. /usr/lib/brand/sparse/common.ksh
+. /usr/lib/brand/ipkg/common.ksh
 
 trap "fail_incomplete 'Installation interrupted.'" INT
 
@@ -39,7 +39,8 @@ if [ -z "$ZONEPATH" -o -z "$ZONENAME" ]; then
 fi
 
 ZONEROOT=$ZONEPATH/root
-ZONEPATH_DS=`zonepath_to_ds_chk $ZONEPATH`
+# Populates ZONEPATH_DS
+get_zonepath_ds $ZONEPATH
 
 # Populate initial structure
 (
@@ -49,9 +50,9 @@ ZONEPATH_DS=`zonepath_to_ds_chk $ZONEPATH`
     umask 022
     mkdir root
     cd root
-    mkdir -p dev etc usr sbin lib var/run tmp var/tmp
+    mkdir -p dev etc usr sbin lib var/run tmp
     chown -R root:sys .
-    chmod 1777 tmp var/tmp
+    chmod 1777 tmp
     ln -s usr/bin
 
 cat << EOM > etc/passwd

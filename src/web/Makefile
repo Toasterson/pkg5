@@ -17,7 +17,7 @@ ROOTUSRSHARELIB = $(ROOTUSRSHARE)/lib
 ROOTPKGWEB = $(ROOTUSRSHARELIB)/pkg/web
 
 THEMESDIR = $(ROOTPKGWEB)/_themes
-THEMES = default omnios.org
+THEMES = default openindiana.org
 
 DIRS = \
        $(ROOTPKGWEB) \
@@ -34,15 +34,15 @@ THEME_DEFAULT = \
 	en/header.shtml \
 	feed-icon-14x14.png
 
-THEME_OOCE = \
+THEME_OI = \
 	en/base.css \
 	en/body_end.shtml \
 	en/footer.shtml \
 	en/head_end.shtml \
 	en/header.shtml \
 	feed-icon-14x14.png \
-	logo_ban0.png \
-	logo_ban0.svg
+	favicon.ico \
+	openindiana.jpg
 
 THEME_SHARED = \
 	p5i-link.png \
@@ -70,7 +70,7 @@ install: $(DIRS) \
 	$(FILES:%=$(ROOTPKGWEB)/%) \
 	$(THEME_SHARED:%=$(THEMESDIR)/%) \
 	$(THEME_DEFAULT:%=$(THEMESDIR)/default/%) \
-	$(THEME_OOCE:%=$(THEMESDIR)/omnios.org/%)
+	$(THEME_OI:%=$(THEMESDIR)/openindiana.org/%)
 
 check clean clobber:
 

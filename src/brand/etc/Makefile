@@ -12,23 +12,9 @@
 # Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
 #
 
-FILES = \
-	OMNIbhyve.xml \
-	OMNIemu.xml \
-	OMNIillumos.xml \
-	OMNIkvm.xml \
-	OMNIlx.xml OMNIlx26.xml \
-	OMNIipkg.xml \
-	OMNIlipkg.xml \
-	OMNIpkgsrc.xml \
-	OMNIsparse.xml \
-	SUNWipkg.xml
+FILES = SUNWipkg.xml OInlipkg.xml
 
 BRANDDIR = $(ROOTETCZONES)
 BRANDFILES = $(FILES:%=$(ROOTETCZONES)/%)
 
 include ../Makefile.com
-
-$(ROOTETCZONES)/OMNIipkg.xml:
-	rm -f $@; ln -s SUNWipkg.xml $@
-

@@ -31,13 +31,13 @@ category = Accessories,Configuration and Preferences,Games,Graphics and Imaging,
 category = Documentation,File Managers,Libraries,Localizations,Scripts,Sessions,Theming,Trusted Extensions,Window Managers
 
 [Development]
-category = C,C++,Databases,Distribution Tools,Editors,Fortran,GNOME and GTK+,GNU,High Performance Computing,Integrated Development Environments,Java,Objective C,Observability,Other Languages,PHP,Perl,Python,Ruby,Source Code Management,Suites,System,X11
+category = Assembly Language,C,C++,Databases,Distribution Tools,Editors,Erlang,Fortran,GNOME and GTK+,GNU,Go,Haskell,High Performance Computing,Integrated Development Environments,Java,JavaScript,Julia,Lisp,Lua,Objective C,Observability,OCaml,Other Languages,PHP,Perl,Python,Ruby,Rust,Smalltalk,Source Code Management,Suites,System,Tcl,X11
 
 [Drivers]
 category = Display,Media,Networking,Other Peripherals,Ports,Storage
 
 [System]
-category = Administration and Configuration,Core,Databases,Enterprise Management,File System,Fonts,Hardware,Internationalization,Libraries,Localizations,Media,Multimedia Libraries,Packaging,Printing,Security,Services,Shells,Software Management,Text Tools,Trusted,Virtualization,X11
+category = Administration and Configuration,Core,Databases,Enterprise Management,File System,Fonts,Hardware,Internationalization,Libraries,Localizations,Media,Multimedia Libraries,Packaging,Printing,Security,Services,Shells,Software Management,Text Tools,Trusted,Virtualization,Wayland,X11
 
 [Web Services]
 category = Application and Web Servers,Communications

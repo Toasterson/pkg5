@@ -22,36 +22,34 @@
 # Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
 #
 
-INSTALL =	/usr/bin/python3.11 ../../setup.py installfile
-CC =		gcc
-LINT =		lint
-MKDIR =		mkdir -p
-PROTO_AREA:sh =	echo $(hg root 2>/dev/null || git rev-parse --show-toplevel)/proto/root_$(uname -p)
-ZONES_LIBDIR =	$(PROTO_AREA)/usr/lib/zones
-ZONES_PROG =	$(PROG:%=$(ZONES_LIBDIR)/%)
+include ../../Makefile.com
+
+LINT = lint
+ZONES_LIBDIR = $(ROOT)/usr/lib/zones
+ZONES_PROG = $(PROG:%=$(ZONES_LIBDIR)/%)
 
 LINTFLAGS =
-CPPFLAGS =	-D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS -I../zoneproxyd 
-CFLAGS = 	-Wall -O3
-LDFLAGS =	-Bdirect
+CPPFLAGS += -I../zoneproxyd -D__EXTENSIONS__
+LDFLAGS += -Bdirect -zdefs
 LDLIBS =
 
-CLEANFILES =	$(PROG) $(OBJS)
-CLOBBERFILES =	$(ZONES_PROG) $(ROOTHDRS)
+CLEANFILES = $(PROG) $(OBJS)
+CLOBBERFILES = $(ZONES_PROG) $(ROOTHDR)
 
-lint_PROG:	$$(PROG).c
+lint_PROG: $$(PROG).c
 	$(LINT.c) $(PROG).c $(LDLIBS)
 
 .c:
-	$(LINK.c) -o $@ $< $(LDLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+	$(POST_PROCESS)
 
-$(ZONES_PROG):	$(PROG)
-	$(RM) $(ZONES_LIBDIR)/$(PROG); \
-		$(MKDIR) -m 0755 $(ZONES_LIBDIR); \
-		$(INSTALL) -m 0555 -d $(ZONES_LIBDIR) -f $(PROG)
+$(ZONES_PROG): $(PROG)
+	$(MKDIR) $(ZONES_LIBDIR)
+	$(RM) $@
+	$(INSTALL) -f $(ZONES_LIBDIR) -m 0555 $(PROG)
 
 clean:
-	-$(RM) $(CLEANFILES)
+	$(RM) $(CLEANFILES)
 
 clobber: clean
-	-$(RM) $(CLOBBERFILES)
+	$(RM) $(CLOBBERFILES)

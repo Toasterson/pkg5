@@ -51,7 +51,6 @@ m_image=$(gettext       "       Image: Preparing at %s.")
 m_incorp=$(gettext      "Sanity Check: Looking for 'entire' incorporation.")
 m_core=$(gettext	"  Installing: Packages (output follows)")
 m_smf=$(gettext		" Postinstall: Copying SMF seed repository ...")
-m_noentire=$(gettext	"!WARNING! - No entire package found, installing minimal package set.")
 
 m_usage=$(gettext "\n        install [-h]\n        install [-c certificate_file] [-k key_file] [-P publisher=uri]\n                [-e extrapkg [...]]\n        install {-a archive|-d path} {-p|-u} [-s|-v]")
 
@@ -247,36 +246,34 @@ if [[ -f /var/pkg/pkg5.image && -d /var/pkg/publisher ]]; then
 fi
 
 printf "$m_core\n"
-pkglist=""
-if [[ -n $entire_fmri ]]; then
-	pkglist="$pkglist $entire_fmri"
-
-	# Install the optional packages from entire if they are installed
-	# in the GZ and not constrained to the global zone.
-	$PKG contents -H -a type=optional \
-	    -o fmri,variant.opensolaris.zone $entire_fmri \
-	    | nawk '$2 != "global" { print $1 }' \
-	    | while read pkg; do
-		pkg=${pkg%%@*}
-		$PKG list -q $pkg && pkglist+=" $pkg"
-	done
-else
-	# If no entire was found, then add a small default set of packages.
-	# Assume the user knows what they are doing...
-
-	printf "\n$m_noentire\n\n"
-
-	pkglist="$pkglist
-	       pkg:///SUNWcs
-	       pkg:///SUNWcsd
-	       pkg:///package/pkg
-	       pkg:///system/network
-	       pkg:///system/network/routing
-	       pkg:///system/extended-system-utilities
-	       pkg:///shell/bash
-	       pkg:///editor/vim
-	"
-fi
+# OpenIndiana zones retain the supported default service/package set.
+pkglist="$entire_fmri
+	 pkg:///SUNWcs
+	 pkg:///SUNWcsd
+	 pkg:///service/management/sysding
+	 pkg:///system/network
+	 pkg:///system/extended-system-utilities
+	 pkg:///compress/bzip2
+	 pkg:///compress/gzip
+	 pkg:///compress/zip
+	 pkg:///compress/unzip
+	 pkg:///package/pkg
+	 pkg:///developer/linker
+	 pkg:///developer/dtrace
+	 pkg:///service/network/network-clients
+	 pkg:///network/ftp
+	 pkg:///shell/bash
+	 pkg:///editor/vim
+	 pkg:///network/ssh
+	 pkg:///service/network/ssh
+	 pkg:///system/network/nis
+	 pkg:///network/dns/bind
+	 pkg:///naming/ldap
+	 pkg:///system/file-system/autofs
+	 pkg:///system/file-system/nfs
+	 pkg:///system/network/routing
+	 pkg:///text/doctools
+"
 
 # For packages which have a cross-zone version dependency, ensure that the
 # installed package is the same version as the global zone.
@@ -326,23 +323,9 @@ cp $ZONEROOT/lib/svc/seed/nonglobal.db $repfile
 chmod 0600 $repfile
 chown root:sys $repfile
 
-#
-# If the global zone is using the rsyslog service, enable that in the zone
-# too.
-#
-if [ "`svcprop -p general/enabled system-log:rsyslog 2>/dev/null`" = true ]
-then
-	. /usr/lib/brand/shared/rsyslog.ksh
-	activate_rsyslog $ZONEROOT
-fi
-
-#
-# If the global zone enables address space layout randomisation by default,
-# do the same in the zone.
-#
-if [ "`svcprop -p default/aslr system/process-security 2>/dev/null`" = true ]
-then
-	cp /usr/lib/brand/shared/aslr.xml $ZONEROOT/etc/svc/profile/site/
+# Ensure useradd -m has a parent directory for home directories.
+if [ ! -d "$ZONEROOT/export/home" ]; then
+	mkdir -p "$ZONEROOT/export/home"
 fi
 
 printf "$m_done\n"
@@ -396,7 +379,8 @@ fi
 
 printf "$m_complete\n\n" ${SECONDS}
 if (( brand_labeled == 0 )); then
-	:
+	printf "$m_postnote\n"
+	printf "$m_postnote2\n"
 else
 	# Umount the dataset on the root.
 	umount $ZONEROOT || printf "$f_zfs_unmount" "$ZONEPATH/root"

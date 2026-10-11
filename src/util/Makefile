@@ -19,7 +19,7 @@ clean := TARGET = clean
 clobber := TARGET = clobber
 install := TARGET = install
 
-SUBDIRS = misc publish/transforms mkcert
+SUBDIRS = misc publish/transforms mkcert apache2
 PKGLIBFILES = opensolaris.org.sections pkglintrc
 
 ROOTPKGLIB = $(ROOTUSRSHARE)/lib/pkg

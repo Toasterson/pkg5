@@ -36,7 +36,6 @@
 	type='service'
 	version='1'>
 
-	<create_default_instance enabled="false" />
 
         <!--
           Wait for network interfaces to be initialized.
@@ -122,9 +121,9 @@
 
 	<property_group name='general' type='framework'>
         	<propval name='action_authorization' type='astring'
-        	        value='solaris.smf.manage.pkg-mirror' />
+                        value='solaris.smf.manage.pkg-mirror' />
 		<propval
-                	name='value_authorization'
+                        name='value_authorization'
 	                type='astring'
         	        value='solaris.smf.value.pkg-mirror' />
         </property_group>
@@ -142,7 +141,7 @@
 		svc:/application/pkg/repositories-setup (on which this
 		service has a dependency).  -->
                 <propval name='repository' type='astring'
-		    value='omnios' />
+		    value='/var/share/pkg/repositories/openindiana' />
 
                 <!--A partial crontab(1) entry defining how often we
 		update the repository. We allow the special value
@@ -162,7 +161,7 @@
 		'config/ref_image' which we receive from.
 		 -->
 		<propval name='publishers' type='astring'
-			value='omnios' />
+			value='openindiana.org,hipster-encumbered' />
 
 		<!-- The cache_dir used for the -c option to pkgrecv(1)
 		-->
@@ -173,11 +172,42 @@
                 <propval name='debug' type='boolean' value='false' />
 
 		<propval
-                	name='value_authorization'
+                        name='value_authorization'
 	                type='astring'
-        	        value='solaris.smf.manage.pkg-mirror' />
+                        value='solaris.smf.manage.pkg-mirror' />
         </property_group>
 
+        <!-- To work around an SMF bug, we create a default instance
+	containing the 'config' property group, specifiying the
+	authorizations we need to allow clients to modify values in it.
+	User-created instances should create this pg with the same
+	'value_authorization' property.
+
+	Without setting these authorizations, user-created instances
+	that use the "random" keyword in the crontab_period will never
+	have that value persistently replaced, and so each time the
+	service starts, the cron job will fire on a different date.
+	-->
+        <instance name="default" enabled="false">
+                <property_group name='config' type='application'>
+                <stability value='Evolving' />
+                <propval name='repository' type='astring'
+			value='/var/share/pkg/repositories/openindiana' />
+                <propval name='crontab_period' type='astring'
+			value='30 2 * * *' />
+                <propval name='ref_image' type='astring' value='/' />
+		<propval name='publishers' type='astring'
+			value='openindiana.org,hipster-encumbered' />
+                <propval name='cache_dir' type='astring'
+                        value='/var/cache/pkg/mirror' />
+                <propval name='debug' type='boolean' value='false' />
+
+		<propval
+                        name='value_authorization'
+	                type='astring'
+                        value='solaris.smf.manage.pkg-mirror' />
+                </property_group>
+        </instance>
 	<stability value='Evolving' />
 
         <template>

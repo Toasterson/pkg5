@@ -232,7 +232,7 @@ static int init_template(void);
 static void listen_func(struct proxy_listener *, port_event_t *);
 static void proxy_func(struct proxy_pair *, port_event_t *);
 static void *proxy_thread_loop(void *);
-static void s_handler(void);
+static void *s_handler(void *);
 static int send_recv_data(struct proxy_pair *);
 static void shutdown_proxypair(struct proxy_pair *);
 static void thread_exiting(void *);
@@ -630,7 +630,7 @@ check_connect(struct proxy_pair *pair)
 static void
 proxy_func(struct proxy_pair *pair, port_event_t *ev)
 {
-	int	rc;
+	int	rc = 0;
 
 	if (ev->portev_events & (POLLERR | POLLHUP | POLLNVAL)) {
 		pair->pp_state = PROXY_STATE_CLOSING;
@@ -638,7 +638,7 @@ proxy_func(struct proxy_pair *pair, port_event_t *ev)
 		return;
 	}
 
-	/* NOTE: "rc" MUST be initialized by any case here. */
+	/* Every active state assigns rc; other states leave it at zero. */
 	switch (pair->pp_state) {
 	case PROXY_STATE_WAIT_CONNECT:
 		rc = check_connect(pair);
@@ -842,6 +842,8 @@ static void *
 zpd_door_loop(void *arg)
 {
 	thread_t *tid;
+
+	(void) arg;
 
 	/*
 	 * If g_door hasn't been set yet, wait for the main thread
@@ -1078,7 +1080,7 @@ ips_contract_open(ctid_t ctid, const char *type, const char *file, int oflag)
 	if (type == NULL)
 		type = "all";
 
-	n = snprintf(path, PATH_MAX, CTFS_ROOT "/%s/%ld/%s", type, ctid, file);
+	n = snprintf(path, PATH_MAX, CTFS_ROOT "/%s/%ld/%s", type, (long)ctid, file);
 	if (n >= sizeof (path)) {
 		errno = ENAMETOOLONG;
 		return (-1);
@@ -1233,12 +1235,12 @@ static boolean_t
 __is_native_zone(zoneid_t zid)
 {
 	char brand[MAXNAMELEN];
-	int i;
+	uint_t i;
 	/*
 	 * Upstream considers native "solaris", "solaris-oci", "sn1", "labeled".
-	 * We use own list (note, it doesn't include "ipkg")
+	 * We use own list (note, it doesn't include "nlipkg")
 	 */
-	const char *name_list[] = { "lipkg", "sparse", "sn1", "labeled" };
+	const char *name_list[] = { "ipkg", "sn1", "labeled" };
 	uint_t nbrands = sizeof (name_list) / sizeof (const char *);
 	char zonename[ZONENAME_MAX];
 	/* global zones have a NULL brand, but can be detected by zid. */
@@ -1263,7 +1265,7 @@ fattach_all_zones(boolean_t detach_only)
 {
 	zoneid_t *zids;
 	uint_t nzids, nzids_last;
-	int i;
+	uint_t i;
 
 again:
 	(void) zone_list(NULL, &nzids);
@@ -1519,6 +1521,8 @@ zpd_door_server(void *cookie, char *argp, size_t arg_size,
 	door_desc_t *r_dp = NULL;
 	door_desc_t rdesc;
 	uint_t r_n_desc = 0;
+
+	(void) cookie;
 
 	if (argp == DOOR_UNREF_DATA) {
 		(void) door_return(NULL, 0, NULL, 0);
@@ -1944,12 +1948,13 @@ fail:
 	return (-1);
 }
 
-static void
-s_handler(void)
+static void *
+s_handler(void *arg)
 {
 	sigset_t get_sigs;
 	int rc;
 
+	(void) arg;
 	(void) sigfillset(&get_sigs);
 	while (g_quit == B_FALSE) {
 		if (sigwait(&get_sigs, &rc) != 0)
@@ -1969,6 +1974,7 @@ s_handler(void)
 			}
 		}
 	}
+	return (NULL);
 }
 
 int
@@ -1976,7 +1982,7 @@ main(int argc, char **argv)
 {
 	extern char *optarg;
 	char *proxystr = NULL;
-	char *proxy_host, *proxy_port;
+	char *proxy_host = NULL, *proxy_port = NULL;
 	int rc;
 	int ncpu;
 	struct proxy_listener *wl;
@@ -2019,8 +2025,7 @@ main(int argc, char **argv)
 			    "host must be of format hostname:port\n");
 			usage();
 		}
-	} else
-		proxy_host = proxy_port = NULL;
+	}
 
 	g_quit = B_FALSE;
 	(void) signal(SIGPIPE, SIG_IGN);
@@ -2142,7 +2147,7 @@ main(int argc, char **argv)
 	fattach_all_zones(B_FALSE);
 
 	/* start signal handling thread */
-	rc = thr_create(NULL, 0, (void *(*)(void *))s_handler, NULL,
+	rc = thr_create(NULL, 0, s_handler, NULL,
 	    THR_BOUND, NULL);
 	if (rc < 0) {
 		perror("thr_create");

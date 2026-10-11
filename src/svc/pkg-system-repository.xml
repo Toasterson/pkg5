@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <!--
-  CDDL HEADER START
-  
-  The contents of this file are subject to the terms of the
-  Common Development and Distribution License (the "License").
-  You may not use this file except in compliance with the License.
+	CDDL HEADER START
 
-  You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
-  or http://www.opensolaris.org/os/licensing.
-  See the License for the specific language governing permissions
-  and limitations under the License.
+	The contents of this file are subject to the terms of the
+	Common Development and Distribution License (the "License").
+	You may not use this file except in compliance with the License.
 
-  When distributing Covered Code, include this CDDL HEADER in each
-  file and include the License file at usr/src/OPENSOLARIS.LICENSE.
-  If applicable, add the following below this CDDL HEADER, with the
-  fields enclosed by brackets "[]" replaced with your own identifying
-  information: Portions Copyright [yyyy] [name of copyright owner]
+	You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+	or http://www.opensolaris.org/os/licensing.
+	See the License for the specific language governing permissions
+	and limitations under the License.
 
-  CDDL HEADER END
+	When distributing Covered Code, include this CDDL HEADER in each
+	file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+	If applicable, add the following below this CDDL HEADER, with the
+	fields enclosed by brackets "[]" replaced with your own identifying
+	information: Portions Copyright [yyyy] [name of copyright owner]
 
-  Copyright (c) 2011, 2025, Oracle and/or its affiliates.
+	CDDL HEADER END
 
-  NOTE:  This service manifest is not editable; its contents will
-  be overwritten by package or patch operations, including
-  operating system upgrade.  Make customizations in a different
-  file.
+	Copyright (c) 2011, 2013 Oracle and/or its affiliates.  All rights reserved.
+
+	NOTE:  This service manifest is not editable; its contents will
+	be overwritten by package or patch operations, including
+	operating system upgrade.  Make customizations in a different
+	file.
 -->
 
 <!DOCTYPE service_bundle SYSTEM "/usr/share/lib/xml/dtd/service_bundle.dtd.1">
@@ -74,11 +74,11 @@
 		<!-- The following methods use the 'all' privilege when
 		     run, but drop privileges once they are no longer
 		     needed using ppriv -s. We need 'all' privileges to
-		     write to /system/volatile. -->
+		     write to /var/run. -->
 		<exec_method
 			type='method'
 			name='start'
-			exec='/lib/svc/method/svc-pkg-sysrepo %m'
+			exec='/lib/svc/method/svc-pkg-sysrepo start'
 			timeout_seconds='60'>
 			<method_context>
 				<method_credential user='pkg5srv'
@@ -87,11 +87,11 @@
 		</exec_method>
 
 
-		<!-- basic,net_privaddr are sufficient for 'stop' -->
+		<!-- basic,net_privaddr are suffient for 'stop' -->
 		<exec_method
 			type='method'
 			name='stop'
-			exec='/lib/svc/method/svc-pkg-sysrepo %m'
+			exec='/lib/svc/method/svc-pkg-sysrepo stop'
 			timeout_seconds='60' >
 			<method_context>
 				<method_credential user='pkg5srv'
@@ -104,7 +104,7 @@
 		<exec_method
 			type='method'
 			name='refresh'
-			exec='/lib/svc/method/svc-pkg-sysrepo %m'
+			exec='/lib/svc/method/svc-pkg-sysrepo refresh'
 			timeout_seconds='60' >
 			<method_context>
              			<method_credential user='pkg5srv'
@@ -113,21 +113,21 @@
 		</exec_method>
 
 
-		<property_group name='config' type='application'>
-			<stability value='Evolving' />
-			<!-- The Image root -->
-			<propval name='image_root' type='astring' value='/' />
-			<!-- The port we listen on -->
-			<propval name='port' type='count' value='1008' />
-			<!-- The host we're running on -->
-			<propval name='host' type='astring' value='127.0.0.1' />
-			<!-- Where we store apache logs -->
-			<propval name='log_dir' type='astring'
-				value='/var/log/pkg/sysrepo' />
-			<!-- Where we store runtime versions of our
+                <property_group name='config' type='application'>
+                        <stability value='Evolving' />
+                        <!-- The image root (normally /). -->
+                        <propval name='image_root' type='astring' value='/' />
+                        <!-- The port we listen on -->
+                        <propval name='port' type='count' value='1008' />
+                        <!-- The host we're running on -->
+                        <propval name='host' type='astring' value='127.0.0.1' />
+                        <!-- Where we store apache logs -->
+                        <propval name='log_dir' type='astring'
+                                value='/var/log/pkg/sysrepo' />
+                        <!-- Where we store runtime versions of our
 			 configuration -->
                         <propval name='runtime_dir' type='astring'
-				value='/system/volatile/pkg/sysrepo' />
+				value='/var/run/pkg/sysrepo' />
                         <!-- Where we store our Mako templates for generating
 			 runtime configuration -->
                         <propval name='template_dir' type='astring'
@@ -145,7 +145,7 @@
                                 value='solaris.smf.value.pkg-sysrepo' />
 
 			<!-- If the system-repository itself should use web
-			proxies to gain access to pkg(7) repositories,
+			proxies to gain access to pkg(5) repositories,
                         specify those here in, the form http://<host>:[port] -->
 			<propval name='http_proxy' type='astring' value='' />
 			<propval name='https_proxy' type='astring' value='' />
@@ -170,7 +170,6 @@
 			<documentation>
 				<manpage title='pkg.sysrepo' section='1M' />
 			</documentation>
-
 			<pg_pattern name='config'>
 				<!-- Private Internal Properties -->
 				<prop_pattern name='value_authorization'>
@@ -209,7 +208,7 @@
 				</prop_pattern>
 
 
-				<!-- 
+				<!--
 				    The remainder of the properties are documented,
 				    in pkg.sysrepo(8)
 				-->

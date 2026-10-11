@@ -27,6 +27,7 @@ import logging
 import mako
 import http.client
 import os
+import queue
 import re
 import shutil
 import sys
@@ -36,6 +37,7 @@ import time
 import traceback
 
 from urllib.parse import quote
+from urllib.request import urlopen
 
 import pkg.misc as misc
 import pkg.p5i

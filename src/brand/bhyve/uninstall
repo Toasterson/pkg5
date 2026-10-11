@@ -11,8 +11,8 @@
 
 # Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 
-. /usr/lib/brand/shared/log.ksh
-. /usr/lib/brand/shared/util.ksh
+. /usr/lib/brand/bhyve/log.ksh
+. /usr/lib/brand/bhyve/util.ksh
 
 ZONENAME="$1"
 ZONEPATH="$2"

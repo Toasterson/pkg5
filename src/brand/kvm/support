@@ -1,71 +1,34 @@
 #!/bin/ksh
-#
-# This file and its contents are supplied under the terms of the
-# Common Development and Distribution License ("CDDL"), version 1.0.
-# You may only use this file in accordance with the terms of version
-# 1.0 of the CDDL.
-#
-# A full copy of the text of the CDDL should have accompanied this
-# source. A copy of the CDDL is also available via the Internet at
-# http://www.illumos.org/license/CDDL.
 
-# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
-
-. /usr/lib/brand/shared/common.ksh
-. /usr/lib/brand/shared/vars.ksh
-. /usr/lib/brand/shared/vnic.ksh
-. /usr/lib/brand/shared/log.ksh
+cmd="${1:?cmd}"
+zone="${2:?zone}"
+root="${3:?root}"
+shift 3
 
 qemu_shutdown()
 {
 	typeset delay=${1:-60}
-	log "qemu_shutdown - %d" $delay
-	echo system_powerdown | \
-	    nc -U "$ZONEPATH/${ZONEPATH:+root/}tmp/vm.monitor" >/dev/null
-	while [ $delay -gt 0 ] && pgrep -z "$ZONENAME" qemu >/dev/null; do
-		log "Waiting for qemu to exit"
+	echo system_powerdown | nc -U "$root/root/tmp/vm.monitor" >/dev/null
+	while [ $delay -gt 0 ] && pgrep -z "$zone" qemu >/dev/null; do
 		((delay = delay - 1))
 		sleep 1
 	done
-	log "qemu_shutdown done"
 }
-
-cmd="${1:?cmd}"
-ZONENAME="${2:?zonename}"
-ZONEPATH=
-if [ $cmd != shutdown ]; then
-	ZONEPATH="$3"
-	# shutdown is run inside the zone context and does not need a path
-	[ -z "$ZONEPATH" ] && fatal "No zonepath provided"
-	shift 3
-fi
-
-log "KVM support z=%s p=%s c=%s %s:%s" "$ZONENAME" "$ZONEPATH" "$cmd" $*
 
 case $cmd in
     shutdown)
-	qemu_shutdown 60
+	qemu_shutdown 0
 	;;
     prestate)
 	case $1:$2 in
-	    *:$ZONE_STATE_CMD_READY)
-		clearlog
-		config_vnics
-		;;
-	    $ZONE_STATE_RUNNING:$ZONE_STATE_CMD_HALT)
-		# halting (even as part of rebooting)
-		qemu_shutdown 0
+	    4:4) # halting (even as part of rebooting)
+		qemu_shutdown 60
 		;;
 	esac
 	;;
     poststate)
-        case $1:$2 in
-            *:$ZONE_STATE_CMD_HALT)
-                unconfig_vnics
-                ;;
-        esac
 	;;
 esac
 
-exit $ZONE_SUBPROC_OK
+exit 0
 

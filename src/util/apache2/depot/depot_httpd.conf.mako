@@ -19,11 +19,11 @@
 #
 # CDDL HEADER END
 #
-# Copyright (c) 2013, 2022, Oracle and/or its affiliates.
+# Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 #
 
 #
-# This file is the template for the Apache configuration that serves pkg(7)
+# This file is the template for the Apache configuration that serves pkg(5)
 # repositories.
 #
 </%doc>
@@ -49,7 +49,7 @@
 # at a local disk.  If you wish to share the same ServerRoot for multiple
 # httpd daemons, you will need to change at least LockFile and PidFile.
 #
-ServerRoot "/usr/apache2/2.2"
+ServerRoot "/usr/apache2/2.4"
 PidFile "${runtime_dir}/../depot_httpd.pid"
 #
 # Listen: Allows you to bind Apache to specific IP addresses and/or
@@ -71,19 +71,25 @@ Listen ${host}:${port}
 # are actually available _before_ they are used.
 #
 
-LoadModule authz_host_module libexec/64/mod_authz_host.so
-LoadModule log_config_module libexec/64/mod_log_config.so
-LoadModule ssl_module libexec/64/mod_ssl.so
-LoadModule mime_module libexec/64/mod_mime.so
-LoadModule dir_module libexec/64/mod_dir.so
-LoadModule alias_module libexec/64/mod_alias.so
-LoadModule rewrite_module libexec/64/mod_rewrite.so
-LoadModule headers_module libexec/64/mod_headers.so
-LoadModule env_module libexec/64/mod_env.so
-LoadModule cache_module libexec/64/mod_cache.so
-LoadModule disk_cache_module libexec/64/mod_disk_cache.so
-LoadModule deflate_module libexec/64/mod_deflate.so
-
+LoadModule access_compat_module libexec/mod_access_compat.so
+LoadModule alias_module libexec/mod_alias.so
+LoadModule authn_core_module libexec/mod_authn_core.so
+LoadModule authz_core_module libexec/mod_authz_core.so
+LoadModule authz_host_module libexec/mod_authz_host.so
+LoadModule cache_module libexec/mod_cache.so
+LoadModule cache_disk_module libexec/mod_cache_disk.so
+LoadModule deflate_module libexec/mod_deflate.so
+LoadModule filter_module libexec/mod_filter.so
+LoadModule dir_module libexec/mod_dir.so
+LoadModule env_module libexec/mod_env.so
+LoadModule headers_module libexec/mod_headers.so
+LoadModule log_config_module libexec/mod_log_config.so
+LoadModule mime_module libexec/mod_mime.so
+LoadModule mpm_worker_module libexec/mod_mpm_worker.so
+LoadModule rewrite_module libexec/mod_rewrite.so
+LoadModule ssl_module libexec/mod_ssl.so
+LoadModule socache_shmcb_module libexec/mod_socache_shmcb.so
+LoadModule unixd_module libexec/mod_unixd.so
 <%!
     import os
     import sys
@@ -91,7 +97,7 @@ LoadModule deflate_module libexec/64/mod_deflate.so
 <%
         context.write("""
 LoadModule wsgi_module libexec/mod_wsgi-{0}.so
-""".format(sys.version[:3]))
+""".format("{0}.{1}".format(*sys.version_info[:2])))
 %>
 
 #
@@ -127,9 +133,6 @@ Header always edit Set-Cookie ^(.*)$ $1;SameSite=strict
 AddOutputFilterByType DEFLATE text/html application/javascript text/css text/plain
 # We only alias a specific script, not all files in ${template_dir}
 WSGIScriptAlias ${sroot}/depot ${template_dir}/depot_index.py
-# Run wsgi script in the current version of Python runtime
-WSGIPythonHome sys.executable
-WSGIPythonPath os.pathsep.join(sys.path)
 
 # We set a 5 minute inactivity timeout: if no requests have been received in the
 # last 5 minutes and no requests are currently being processed, mod_wsgi shuts
@@ -142,7 +145,7 @@ WSGIPythonPath os.pathsep.join(sys.path)
                 context.write("""
 WSGIDaemonProcess pkgdepot processes=1 threads=21 user=pkg5srv group=pkg5srv display-name=pkg5_depot inactivity-timeout=300 python-path={0}/usr/lib/python{1}
 SetEnv PKG5_TEST_PROTO {2}
-""".format(test_proto, sys.version[:3], test_proto))
+""".format(test_proto, "{0}.{1}".format(*sys.version_info[:2]), test_proto))
         else:
                 context.write("""
 WSGIDaemonProcess pkgdepot processes=1 threads=21 user=pkg5srv group=pkg5srv display-name=pkg5_depot inactivity-timeout=300
@@ -219,8 +222,7 @@ DocumentRoot "${runtime_dir}/htdocs"
 <Directory />
     Options FollowSymLinks
     AllowOverride None
-    Order deny,allow
-    Deny from all
+    Require all denied
 </Directory>
 
 #
@@ -243,7 +245,7 @@ DocumentRoot "${runtime_dir}/htdocs"
     # doesn't give it to you.
     #
     # The Options directive is both complicated and important.  Please see
-    # http://httpd.apache.org/docs/2.2/mod/core.html#options
+    # http://httpd.apache.org/docs/2.4/mod/core.html#options
     # for more information.
     #
     Options FollowSymLinks
@@ -258,8 +260,7 @@ DocumentRoot "${runtime_dir}/htdocs"
     #
     # Controls who can get stuff from this server.
     #
-    Order allow,deny
-    Allow from all
+    Require all granted
 
 </Directory>
 
@@ -268,7 +269,7 @@ DocumentRoot "${runtime_dir}/htdocs"
     SetHandler wsgi-script
     WSGIProcessGroup pkgdepot
     Options ExecCGI
-    Allow from all
+    Require all granted
 </Directory>
 
 #
@@ -284,9 +285,7 @@ DocumentRoot "${runtime_dir}/htdocs"
 # viewed by Web clients.
 #
 <FilesMatch "^\.ht">
-    Order allow,deny
-    Deny from all
-    Satisfy All
+    Require all denied
 </FilesMatch>
 
 #
@@ -303,7 +302,7 @@ ErrorLog "${log_dir}/error_log"
 # Possible values include: debug, info, notice, warn, error, crit,
 # alert, emerg.
 #
-LogLevel warn
+LogLevel warn rewrite:debug
 
 <IfModule log_config_module>
     #
@@ -331,19 +330,8 @@ LogLevel warn
     # If you prefer a logfile with access, agent, and referer information
     # (Combined Logfile Format) you can use the following directive.
     #
-    #CustomLog "/var/apache2/2.2/logs/access_log" combined
+    #CustomLog "/var/apache2/2.4/logs/access_log" combined
 </IfModule>
-
-#
-# DefaultType: the default MIME type the server will use for a document
-# if it cannot otherwise determine one, such as from filename extensions.
-# If your server contains mostly text or HTML documents, "text/plain" is
-# a good value.  If most of your content is binary, such as applications
-# or images, you may want to use "application/octet-stream" instead to
-# keep browsers from trying to display binary files as though they are
-# text.
-#
-DefaultType text/plain
 
 #
 # Note: The following must must be present to support
@@ -487,7 +475,7 @@ RewriteRule ^${sroot}/repos.shtml$ ${sroot}/depot/repos.shtml [NE,PT]
         context.write("# Map the default publishers for {repo_path} to "
             "{pub}\n".format(**locals()))
 
-        if "pub" is not None:
+        if "pub" != None:
                 # search
                 context.write("RewriteRule ^/{root}{repo_prefix}search/(.*)$ "
                     "{root}/depot/{repo_prefix}{pub}/search/$1 [NE,PT]\n"
@@ -525,6 +513,6 @@ RewriteRule ^${sroot}/repos.shtml$ ${sroot}/depot/repos.shtml [NE,PT]
         if not test_proto:
                 context.write("""
 # Include any site-specific configuration
-Include /etc/pkg/depot/conf.d/*.conf
+IncludeOptional /etc/pkg/depot/conf.d/*.conf
 """)
 %>

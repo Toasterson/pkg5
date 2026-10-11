@@ -21,7 +21,7 @@
 
 #
 # Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2020, 2021 OmniOS Community Edition (OmniOSce) Association.
 #
 
 unset LD_LIBRARY_PATH
@@ -29,13 +29,116 @@ PATH=/usr/bin:/usr/sbin
 export PATH
 
 . /usr/lib/brand/shared/common.ksh
-. /usr/lib/brand/shared/firewall.ksh
-. /usr/lib/brand/shared/vnic.ksh
-. /usr/lib/brand/shared/util.ksh
-. /usr/lib/brand/shared/log.ksh
+
+# Inert helpers retained from the shared brand library.
 
 PROP_PARENT="org.opensolaris.libbe:parentbe"
 PROP_ACTIVE="org.opensolaris.libbe:active"
+
+ZONE_STATE_CONFIGURED=0	# never see
+ZONE_STATE_INCOMPLETE=1	# never see
+ZONE_STATE_INSTALLED=2
+ZONE_STATE_READY=3
+ZONE_STATE_RUNNING=4
+ZONE_STATE_SHUTTING_DOWN=5
+ZONE_STATE_DOWN=6
+ZONE_STATE_MOUNTED=7
+ZONE_STATE_SYSBOOT=99
+
+ZONE_STATE_CMD_READY=0
+ZONE_STATE_CMD_BOOT=1
+ZONE_STATE_CMD_HALT=4
+
+# These values must be kept synchronised with <sys/zone.h>
+
+ZONE_SUBPROC_OK=0
+ZONE_SUBPROC_USAGE=253
+ZONE_SUBPROC_NOTCOMPLETE=254
+ZONE_SUBPROC_FATAL=255
+
+function setuplog {
+	[ -n "$LOGFILE" ] && return
+	if [ -n "$ZONEPATH" ]; then
+		mkdir -p "$ZONEPATH/log"
+		LOGFILE="$ZONEPATH/log/zone.log"
+	else
+		LOGFILE="/tmp/zone.log"
+	fi
+	touch "$LOGFILE"
+	chown root:root "$LOGFILE"
+	chmod 600 "$LOGFILE"
+	exec 2>>"$LOGFILE"
+}
+
+function clearlog {
+	setuplog
+	: >"$LOGFILE"
+	exec 2>>"$LOGFILE"
+}
+
+function log {
+        typeset fmt="$1"; shift
+
+	setuplog
+
+        [ -n "$OPT_V" ] && printf "${fmt}\n" "$@"
+        printf "[`date`] $fmt\n" "$@" >&2
+}
+
+function elog {
+	OPT_V=1 log "$@"
+}
+
+function error {
+        typeset fmt="$1"; shift
+
+	OPT_V=1 log "ERROR: $fmt" "$@" >> /dev/stderr
+}
+
+function fatal {
+	error "$@"
+	exit $ZONE_SUBPROC_FATAL
+}
+
+function zonepath_to_ds {
+	typeset path="${1:?zonepath}"
+
+	df -k "$path" 2>/dev/null | nawk -v zp="$path" '$6 == zp { print $1 }'
+}
+
+function zonepath_to_ds_chk {
+	typeset path="${1:?zonepath}"
+	typeset zoneds=`zonepath_to_ds "$path"`
+
+	if [ -z "$zoneds" ]; then
+		# The zone has no dataset and this should have been created
+		# automatically by zoneadm. Check for the parent dataset so we
+		# can provide a more helpful error message.
+		typeset ppath=`dirname "$path"`
+		if [ -z "`zonepath_to_ds $ppath`" ]; then
+			fatal "Could not find parent dataset for %s\nMake sure that %s is a ZFS dataset" \
+			    "$path" "$ppath"
+		else
+			fatal "Could not find a ZFS dataset for %s" "$path"
+		fi
+	fi
+	echo "$zoneds"
+}
+
+#
+# Retrieve an attribute from the zone configuration
+#
+function zone_attr {
+	typeset zone="${1:?zone}"
+	typeset attr="${2:?attr}"
+
+	zonecfg -z "$zone" info attr name=$attr \
+	    | nawk '$1 == "value:" {print $2}'
+}
+
+get_gzbe_uuid() {
+	beadm list -H | /usr/bin/nawk -F';' '$3 ~ "N" { print $2 }'
+}
 
 f_incompat_options=$(gettext "cannot specify both %s and %s options")
 f_sanity_detail=$(gettext  "Missing %s at %s")
@@ -69,10 +172,12 @@ e_badunmount=$(gettext "Zone unmount failed")
 e_exitfail=$(gettext "Postprocessing failed.")
 
 m_complete=$(gettext    "        Done: Installation completed in %s seconds.")
+m_postnote=$(gettext    "  Next Steps: Boot the zone, then log into the zone console (zlogin -C)")
+m_postnote2=$(gettext "              to complete the configuration process.")
 
 lc_pkg() {
 	[ "$1" = "-v" ] && shift && echo "PKG: $@" 1>&2
-	LC_ALL=C /usr/bin/pkg "$@"
+	LC_ALL=C.UTF-8 /usr/bin/pkg "$@"
 }
 
 fail_incomplete() {
@@ -320,7 +425,7 @@ unconfigure_zone() {
 
 	ZONE_BRAND=`zoneadm list -pc | /usr/bin/nawk -v zone=$ZONENAME -F':' '$2 == zone { print $6 }'`
 	case "$ZONE_BRAND" in
-	    ipkg|lipkg|sparse|pkgsrc|vm)
+	    ipkg|nlipkg)
 		zlogin -S $ZONENAME /usr/lib/brand/ipkg/system-unconfigure -R /a \
 		    >/dev/null 2>&1
 		if (( $? != 0 )); then
@@ -512,11 +617,6 @@ pkg_err_check() {
 function config_network {
 
 	################################################################
-	# On-demand VNICs
-
-	config_vnics
-
-	################################################################
 	# DNS configuration files within the zone.
 	#  /etc/resolv.conf
 	#  /etc/nsswitch.conf
@@ -536,12 +636,5 @@ function config_network {
 		egrep -s 'files +dns' $ZONEPATH/root/etc/nsswitch.conf \
 		    || cp $ZONEPATH/root/etc/nsswitch.{dns,conf}
 	fi
-}
-
-#
-# Unconfigure network parameters based on zone configuration
-#
-function unconfig_network {
-	unconfig_vnics
 }
 

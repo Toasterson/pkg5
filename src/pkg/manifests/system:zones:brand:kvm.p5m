@@ -10,7 +10,7 @@
 # source. A copy of the CDDL is also available via the Internet at
 # http://www.illumos.org/license/CDDL.
 #
-# Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 #
 
 set name=pkg.fmri value=pkg:/system/zones/brand/kvm@$(PKGVERS)
@@ -19,23 +19,14 @@ set name=pkg.description value="Support for kvm branded zones"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
 set name=variant.arch value=$(ARCH)
-dir  path=etc
-dir  path=etc/zones
-file path=etc/zones/OMNIkvm.xml
 dir  path=usr/lib
 dir  path=usr/lib/brand
 dir  path=usr/lib/brand/kvm
-file path=usr/lib/brand/kvm/config.xml mode=0444
-link path=usr/lib/brand/kvm/createzone target=../bhyve/createzone
-file path=usr/lib/brand/kvm/init mode=0555 pkg.depend.bypass-generate=.*
-file path=usr/lib/brand/kvm/platform.xml mode=0444
-link path=usr/lib/brand/kvm/socat target=../bhyve/socat
-file path=usr/lib/brand/kvm/support mode=0555
-link path=usr/lib/brand/kvm/uninstall target=../bhyve/uninstall
-dir  path=usr/share/man/man7
-file path=usr/share/man/man7/kvm.7
-license lic_CDDL license=lic_CDDL
-depend type=require fmri=driver/virtualization/kvm
+file path=usr/lib/brand/kvm/config.xml mode=0644
+file path=usr/lib/brand/kvm/createzone mode=0755
+file path=usr/lib/brand/kvm/init mode=0755 pkg.depend.bypass-generate=.*
+file path=usr/lib/brand/kvm/platform.xml mode=0644
+file path=usr/lib/brand/kvm/socat mode=0755 pkg.depend.bypass-generate=.*
+file path=usr/lib/brand/kvm/support mode=0755
 depend type=require fmri=network/netcat
-depend type=require fmri=system/kvm
-depend type=require fmri=system/zones/brand/bhyve@$(PKGVERS)
+depend type=require fmri=system/qemu/kvm

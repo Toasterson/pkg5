@@ -70,7 +70,7 @@ fix_net()
 		return
 	fi
 
-	NET=$(LC_ALL=C zonecfg -z $ZONENAME info net)
+	NET=$(LC_ALL=C.UTF-8 zonecfg -z $ZONENAME info net)
 	if (( $? != 0 )); then
 		error "$e_badinfo" "net"
 		return
@@ -106,7 +106,7 @@ fix_net()
 #
 # Disable all of the shares since the zone cannot be an NFS server.
 # Note that we disable the various instances of the svc:/network/shares/group
-# SMF service in the fix_smf function. 
+# SMF service in the fix_smf function.
 #
 fix_nfs()
 {
@@ -151,7 +151,7 @@ fix_nfs()
 
 #
 # Comment out most of the old mounts since they are either unneeded or
-# likely incorrect within a zone.  Specific mounts can be manually 
+# likely incorrect within a zone.  Specific mounts can be manually
 # reenabled if the corresponding device is added to the zone.
 #
 fix_vfstab()
@@ -268,7 +268,7 @@ rm_pkgs()
 		fi
 
 		vlog "$v_rmpkg" "$i"
-		zlogin -S $ZONENAME LC_ALL=C \
+		zlogin -S $ZONENAME LC_ALL=C.UTF-8 \
 		    /usr/bin/pkg -R /a uninstall -r $i </dev/null >&2 || \
 		    error "$e_rmpkg" $i
 	done

@@ -24,33 +24,33 @@
 #
 # This file is a template for the IPS system publisher Apache configuration
 # file.  It is used to serve the "publisher" response from proxied file://
-# repositories to pkg(7) clients that aren't using the "syspub" response
+# repositories to pkg(5) clients that aren't using the "syspub" response
 # to obtain their publisher information.
 #
 </%doc>
 {
-  "packages": [], 
+  "packages": [],
   "publishers": [
     {
-      "alias": null, 
-      "intermediate_certs": [], 
-      "name": "${pub}", 
-      "packages": [], 
+      "alias": null,
+      "intermediate_certs": [],
+      "name": "${pub}",
+      "packages": [],
       "repositories": [
         {
           "collection_type": "core",
           "description": "This is an automatic response.  This publisher is generated automatically by the IPS system repository, and serves content from a file-based repository.",
-          "legal_uris": [], 
-          "mirrors": [], 
-          "name": "IPS System Repository: ${pub}", 
-          "origins": [], 
-          "refresh_seconds": null, 
-          "registration_uri": "", 
+          "legal_uris": [],
+          "mirrors": [],
+          "name": "IPS System Repository: ${pub}",
+          "origins": [],
+          "refresh_seconds": null,
+          "registration_uri": "",
           "related_uris": []
         }
-      ], 
+      ],
       "signing_ca_certs": []
     }
-  ], 
+  ],
   "version": 1
 }
