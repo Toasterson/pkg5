@@ -1249,9 +1249,7 @@ opts_update = (
 )
 
 # "update-format"
-opts_update_format = \
-    opts_table_li_recurse + \
-    []
+opts_update_format = opts_table_li_recurse + []
 
 # "apply-hot-fix"
 opts_apply_hot_fix = (
