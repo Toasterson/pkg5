@@ -9,36 +9,20 @@
 # http://www.illumos.org/license/CDDL.
 
 #
-# Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 BRAND = bhyve
-FILES = boot config.xml createzone init platform.xml socat support uninstall \
-	bootlib.py bundle.py uefi/__init__.py uefi/align.py uefi/vars.py
-BINS = init boot
-
-PYMODULES = $(PYVERSIONS:%=modules/%)
+FILES = config.xml createzone firewall.ksh image.ksh init log.ksh platform.xml socat support uninstall util.ksh vars.ksh
 
 BRANDDIR = $(ROOTBRAND)/$(BRAND)
-BRANDFILES = $(FILES:%=$(BRANDDIR)/%) $(PYMODULES)
-
-LDLIBS += -lzfs
-
-all: $(BINS)
-
-init: init.c
-	$(LINK.c) -o $@ $@.c $(LDLIBS)
-	$(POST_PROCESS)
+BRANDFILES = $(FILES:%=$(BRANDDIR)/%)
 
 include ../Makefile.com
 
-$(BRANDDIR)/uefi: FRC
-	mkdir -p $@
-
-$(BRANDFILES): $(BRANDDIR)/uefi
-
-$(PYMODULES): FRC
-	$(CODE_WS)/tools/installmodules $(CODE_WS) $(ROOT) $(@F) \
-            install $(BRANDDIR) bhyve requirements.txt
-
-FRC:
+# Rewrite the selected interpreter, including a shebang without arguments.
+$(BRANDDIR)/init: $(BRANDDIR) init
+	$(RM) $@
+	$(SED) -e '1s/python3 /python$(PYVER) /' \
+	    -e '1s/python3$$/python$(PYVER)/' init > $@
+	$(CHMOD) 0755 $@

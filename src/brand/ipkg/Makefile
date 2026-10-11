@@ -15,8 +15,7 @@
 BRAND = ipkg
 FILES = attach clone common.ksh detach fmri_compare image_install p2v \
 	pkgcreatezone pkgrm.lst poststate prestate smf_disable.lst \
-	support system-unconfigure uninstall \
-	config.xml platform.xml
+	support system-unconfigure uninstall
 EFILES = pkgrm.conf smf_disable.conf
 BINS = support fmri_compare
 

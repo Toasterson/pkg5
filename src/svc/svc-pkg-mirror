@@ -193,7 +193,7 @@ same 'config/repository' value, which is not supported." $SMF_FMRI fatal
 			#
 			DS="$special/$repo_base"
 
-			$ZFS create "$DS"
+			$ZFS create -o canmount=noauto "$DS"
 			check_failure $? \
 			    "unable to create zfs dataset $DS" \
 			    $SMF_FMRI fatal

@@ -54,13 +54,14 @@ static int g_pipe_fd;
 static int zp_unregister_zone(void);
 
 /* ARGSUSED */
-static void
-s_handler(void)
+static void *
+s_handler(void *arg)
 {
 	int sig;
 	int do_exit = 0;
 	sigset_t wait_sigs;
 
+	(void) arg;
 	(void) sigfillset(&wait_sigs);
 
 	while (do_exit == 0) {
@@ -546,7 +547,7 @@ main(int argc, char **argv)
 	}
 
 	/* create signal handling thread */
-	if (thr_create(NULL, 0, (void *(*)(void *))s_handler, NULL,
+	if (thr_create(NULL, 0, s_handler, NULL,
 	    THR_BOUND, NULL) < 0) {
 		perror("thr_create");
 		exit(EXIT_FAILURE);

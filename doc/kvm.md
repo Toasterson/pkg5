@@ -4,7 +4,7 @@
 KVM branded zones are configured mainly via custom attributes in the zone
 configuration.
 
-To get started, `pkg install brand/kvm` and configure a zone with the
+To get started, `pkg install system/zones/brand/kvm` and configure a zone with the
 kvm brand and the appropriate attributes; see the example zone at the end of
 this page.
 
@@ -17,9 +17,9 @@ which will be created at `/path/to/zone/root/tmp/init.log`
 | ---		| ---			| ---			| ---
 | bootdisk<sup>1</sup>	| 			| path[,serial=<serno>] | tank/hdd/kvm1
 | bootorder	| cd			| \[c\]\[d\]\[n\]
-| cdrom<sup>4</sup>		|			| path to ISO		  | /data/iso/FreeBSD-11.1-RELEASE-amd64-bootonly.iso
+| cdrom<sup>3</sup>		|			| path to ISO		  | /data/iso/FreeBSD-11.1-RELEASE-amd64-bootonly.iso
 | cpu		| qemu64		|
-| console	| pipe,id=console0,path=/dev/zconsole<sup>6</sup>	| options		|
+| console	| pipe,id=console0,path=/dev/zconsole<sup>4</sup>	| options		|
 | disk<sup>1</sup>		| 			| path[,serial=<serno>] | tank/hdd/kvm2,serial=1234
 | diskN<sup>2</sup>		| 			| path[,serial=<serno>] | tank/hdd/kvm2,serial=1234
 | diskif	| virtio		| virtio,ahci
@@ -27,7 +27,7 @@ which will be created at `/path/to/zone/root/tmp/init.log`
 | ram		| 1G			| n(G\|M)		| 8G
 | type		| generic		| generic
 | vcpus		| 1			|  n			| 16
-| vnc<sup>5</sup>		| off			| off,on,options	| unix:/tmp/vm.vnc
+| vnc<sup>4</sup>		| off			| off,on,options	| unix:/tmp/vm.vnc
 | extra		|			| extra arguments for hypervisor |
 
 #### Notes
@@ -35,7 +35,6 @@ which will be created at `/path/to/zone/root/tmp/init.log`
 <ol>
 <li>You will also need to pass the underlying disk device through to the zone via a <i>device</i> entry, see the example below;</li>
 <li>Use diskN to specify the slot into which the disk will be placed. A plain <i>disk</i> tag will be put in the lowest available slot.</li>
-<li>Available firmware files can be found in <i>/usr/share/kvm/firmware/</i>;</li>
 <li>The ISO file needs passing through to the zone via a lofs mount, see the example below;</li>
 <li>Setting vnc to <i>on</i> is the same as setting it to <i>unix=/tmp/vm.vnc</i>.</li>
 <li>You can connect to the virtual machine console from the global zone with <i>zlogin -C zonename</i>;</li>
@@ -174,5 +173,11 @@ set name=disk1
 set type=string
 set value=tank/hdd/oi2,serial=1234
 end
+```
+
+You can connect to kvm vga console of zone with vncviewer and socat. For example:
+```
+# socat TCP-LISTEN:5500  UNIX-CONNECT:/data/zone/oi/root/tmp/vm.vnc
+$ vncviewer localhost:5500
 ```
 

@@ -20,31 +20,16 @@
 # CDDL HEADER END
 #
 #
-# Copyright (c) 2013, 2021, Oracle and/or its affiliates.
+# Copyright (c) 2013, 2017, Oracle and/or its affiliates. All rights reserved.
 #
 
 . /lib/svc/share/smf_include.sh
 
-APACHE_HOME=/usr/apache2/2.2
+APACHE_HOME=/usr/apache2/2.4
 APACHE_ETC_ROOT=/etc/pkg/depot
-APACHE_BIN=${APACHE_HOME}/bin/64
+APACHE_BIN=${APACHE_HOME}/bin
 
-#
-# Calling $APACHE_BIN/apachectl would source $APACHE_BIN/envvars, which
-# in turn would source /etc/apache2/2.2/envvars, if it exists.
-#
-# We want to keep the depot service completely separate from
-# the site system configuration used by svc:/network/http:apache22
-# avoiding /etc/apache2, which means we must avoid apachectl.
-#
-# In this method script, we call httpd directly instead, but as a
-# result, we also need to include the relevant contents of
-# $APACHE_BIN/envvars - setting $LD_LIBRARY_PATH as it does.
-#
-HTTPD=${APACHE_BIN}/httpd.worker
-LD_LIBRARY_PATH=${APACHE_HOME}/lib/64:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH
-
+HTTPD=${APACHE_BIN}/apachectl
 
 function check_prop {
 	if [ -z "$1" ]; then
@@ -72,7 +57,7 @@ function get_smf_props {
         	sed -e 's#config/#depot_#g' -e 's/$/,/g')"
 	IFS=,
 	for line in $SMF_PROPS ; do
-        	IFS=' 
+        IFS='
 '
         	eval $(get_pair $line)
 	done
@@ -106,8 +91,8 @@ function abspath {
 	# print a normalized version of a path, needed because
 	# many utilities will not dereference non-existent directories
 	# in path names, e.g. cat /etc/no-such-dir/../motd will fail.
-	echo $1 | /usr/bin/python3 -c \
-    'import os.path ; import sys ; print(os.path.normpath(sys.stdin.read()))'
+	echo $1 | /usr/bin/python -c \
+    'import os.path ; import sys ; print os.path.normpath(sys.stdin.read())'
 }
 
 function run_depot {
@@ -173,18 +158,18 @@ function run_htcacheclean {
 		# megabytes, being nice about scheduling and removing
 		# empty directories if necessary.
 	       interval=$((60 * 24 * 14))
-               /usr/apache2/2.2/bin/htcacheclean \
+               /usr/bin/su pkg5srv -c "/usr/apache2/2.4/bin/htcacheclean \
                        -d${interval} -i -l ${depot_cache_max}M -n \
                        -p ${depot_cache_dir} \
                        -P ${depot_cache_dir}/../depot_htcacheclean.pid \
-                       -t
+                       -t"
                check_failure $? "htcacheclean failed to run cleanly"
        fi
 }
 
 function kill_htcacheclean {
 	pid_file=$(abspath ${depot_cache_dir}/../depot_htcacheclean.pid)
-	if [ -f "$pid_file" ]; then
+	if [ -f $pid_file ]; then
                 PID=$(< $pid_file)
                 /usr/bin/kill -TERM $PID
                 check_failure $? "failed to kill htcacheclean process\
@@ -194,15 +179,15 @@ function kill_htcacheclean {
 
 function kill_apache {
 	# We go to lengths to kill remaining httpd processes: if we kill
-	# just the pid, then child httpd.worker processes become
-	# zombies, hanging onto the server port, which causes problems
+	# just the pid, then child httpd processes become zombies,
+	# hanging onto the server port, which causes problems
 	# when trying to start a service that is transitioning from
 	# maintenance.
 	# This function should only be called when the service is
 	# transitioning to maintenance: normal Apache shutdown is
 	# preferable.
 	pid_file=$(abspath ${depot_runtime_dir}/../depot_httpd.pid)
-	if [ -f "$pid_file" ]; then
+	if [ -f $pid_file ]; then
 		PID=$(< $pid_file)
 		/usr/bin/ptree $PID | /usr/bin/awk '{print $1}' | \
 		    /usr/bin/xargs /usr/bin/kill -TERM
@@ -259,8 +244,6 @@ case "$1" in
 "start")
 	cmd="start"
 	run_depot
-	# drop privileges now that we've written our configuration
-	/usr/bin/ppriv -s E=basic,net_privaddr $$
 	run_htcacheclean
         emsg=$(/usr/bin/printf ${FAILED_TO_RUN} start)
 	${HTTPD} -f ${depot_runtime_dir}/depot_httpd.conf \
@@ -271,8 +254,6 @@ case "$1" in
 "refresh")
 	cmd="graceful"
 	run_depot
-	# drop privileges now that we've written our configuration
-	/usr/bin/ppriv -s E=basic,net_privaddr $$
 	kill_htcacheclean
 	run_htcacheclean
         emsg=$(/usr/bin/printf ${FAILED_TO_RUN} refresh)

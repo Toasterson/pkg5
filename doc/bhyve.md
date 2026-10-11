@@ -4,7 +4,7 @@
 Bhyve branded zones are configured mainly via custom attributes in the zone
 configuration.
 
-To get started, `pkg install brand/bhyve` and configure a zone with the
+To get started, `pkg install system/zones/brand/bhyve` and configure a zone with the
 bhyve brand and the appropriate attributes; see the example zone at the end of
 this page.
 
@@ -18,7 +18,7 @@ which will be created at `/path/to/zone/root/tmp/init.log`
 | acpi		| on			| on,off
 | bootdisk<sup>1</sup>	| 			| path[,serial=<serno>] | tank/hdd/bhyve1
 | bootorder	| cd			| \[c\]\[d\]
-| bootrom<sup>3</sup>	| BHYVE_RELEASE_CSM	| firmware name\|path to firmware | BHYVE_DEBUG_CSM
+| bootrom<sup>3</sup>	| BHYVE_RELEASE	| firmware name\|path to firmware | BHYVE_DEBUG
 | cdrom<sup>4</sup>		|			| path to ISO		  | /data/iso/FreeBSD-11.1-RELEASE-amd64-bootonly.iso
 | console	| /dev/zconsole<sup>6</sup>	| options		| socket,/tmp/vm.com1,wait
 | disk<sup>1</sup>		| 			| path[,serial=<serno>] | tank/hdd/bhyve2,serial=1234
@@ -52,7 +52,7 @@ this does not configure the address within the virtual machine but rather
 prevents the use of any other address (L3 protection).
 
 ```
-bloody# zonecfg -z bhyve info
+hipster# zonecfg -z bhyve info
 zonename: bhyve
 zonepath: /data/zone/bhyve
 brand: bhyve
@@ -74,10 +74,7 @@ net:
         address not specified
         allowed-address: 10.0.0.112/24
         defrouter not specified
-        global-nic not specified
-        mac-addr not specified
         physical: bhyve0
-        vlan-id not specified
 device:
         match: /dev/zvol/rdsk/tank/hdd/bhyve0
 device:
@@ -127,7 +124,7 @@ attr:
 ```
 
 ```
-bloody# zonecfg -z bhyve export
+hipster# zonecfg -z bhyve export
 create -b
 set zonepath=/data/zone/bhyve
 set brand=bhyve

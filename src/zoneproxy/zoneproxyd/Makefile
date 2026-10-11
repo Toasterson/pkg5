@@ -29,7 +29,7 @@ OBJS =	$(SRCS:%.c=%.o)
 
 include ../Makefile.constants
 
-ROOTHDIR =	$(PROTO_AREA)/usr/include
+ROOTHDIR =	$(ROOT)/usr/include
 ROOTHDR =	$(ROOTHDIR)/$(HDR)
 CLOBBERFILES +=	$(ROOTHDR)
 
@@ -40,7 +40,7 @@ LINTFLAGS +=	-erroff=E_SEC_CREAT_WITHOUT_EXCL -U__PRAGMA_REDEFINE_EXTNAME
 .KEEP_STATE:
 
 $(ROOTHDR): $(ROOTHDIR) $(HDR)
-	$(INSTALL) -m 0644 -d $(ROOTHDIR) -f $(HDR)
+	$(RM) $@; $(INSTALL) -f $(ROOTHDIR) -m 0644 $(HDR)
 
 $(ROOTHDIR):
 	$(MKDIR) -m 0755 $@

@@ -72,7 +72,7 @@
 
 	<property_group name='config' type='application'>
 		<propval name='dataset' type='astring'
-		    value='pkg-repositories'/>
+		    value='VARSHARE/pkg/repositories'/>
 		<propval name='mountpoint' type='astring'
 		    value='/var/share/pkg/repositories'/>
 	</property_group>

@@ -9,24 +9,20 @@
 # http://www.illumos.org/license/CDDL.
 
 #
-# Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 BRAND = kvm
-FILES = config.xml init platform.xml support
-BINS = init
-BHYVELINKS = createzone uninstall socat
+FILES = config.xml createzone init platform.xml socat support
 
 BRANDDIR = $(ROOTBRAND)/$(BRAND)
-ROOTBHYVELINKS = $(BHYVELINKS:%=$(BRANDDIR)/%)
-BRANDFILES = $(FILES:%=$(BRANDDIR)/%) $(ROOTBHYVELINKS)
-
-all: $(BINS)
+BRANDFILES = $(FILES:%=$(BRANDDIR)/%)
 
 include ../Makefile.com
 
-$(ROOTBHYVELINKS): FRC
-	rm -f $@; ln -s ../bhyve/$(@F) $@
-
-FRC:
-
+# Rewrite the selected interpreter, including a shebang without arguments.
+$(BRANDDIR)/init: $(BRANDDIR) init
+	$(RM) $@
+	$(SED) -e '1s/python3 /python$(PYVER) /' \
+	    -e '1s/python3$$/python$(PYVER)/' init > $@
+	$(CHMOD) 0755 $@

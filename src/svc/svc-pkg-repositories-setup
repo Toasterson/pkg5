@@ -32,7 +32,7 @@ CHOWN=/usr/bin/chown
 ZFS=/usr/sbin/zfs
 
 dataset="`svcprop -p config/dataset $SMF_FMRI`"
-[ -n "$dataset" ] || dataset=pkg-repositories
+[ -n "$dataset" ] || dataset=VARSHARE/pkg/repositories
 
 mp="`svcprop -p config/mountpoint $SMF_FMRI`"
 [ -n "$mp" ] || mp=/var/share/pkg/repositories
@@ -49,30 +49,42 @@ case "$1" in
 
 	# readmnttab has populated 'special'
 	be=$special
-	pool=${special%%/*}
+	baseds=$(/usr/bin/dirname "$be")
+	# Dataset names are relative to the BE parent, also inside OI zones.
+	DS="$baseds/$dataset"
 
 	# If the dataset exists, mount it along with any child datasets,
 	# then exit.
-	if $ZFS list "$pool/$dataset" >/dev/null 2>&1; then
+	if $ZFS list "$DS" >/dev/null 2>&1; then
 		child_fs_mount=0
 		for child in \
-		    `$ZFS list -H -r -t filesystem -o name "$pool/$dataset"`
+		    `$ZFS list -H -r -t filesystem -o name "$DS"`
 		do
 			$ZFS mount "$child"
 			((child_fs_mount += $?))
 		done
 		[ "$child_fs_mount" -eq 0 ] && exit $SMF_EXIT_OK
-		echo "Unable to mount child datasets of $pool/$dataset"
+		echo "Unable to mount child datasets of $DS"
 		exit $SMF_EXIT_ERR_FATAL
 	fi
 
 	# Otherwise, create the dataset, and delegate permissions to the user.
-	$ZFS create -o mountpoint="$mp" "$pool/$dataset"
-	check_failure $? "Unable to create $pool/$dataset" $SMF_FMRI fatal
+	# Create the hierarchy, retaining OI noauto behavior on the container.
+	$ZFS create -p -o canmount=noauto -o mountpoint="$mp" "$DS"
+	check_failure $? "Unable to create $DS" $SMF_FMRI fatal
 
-	$ZFS allow pkg5srv create,mount,canmount,snapshot "$pool/$dataset"
+	parentds=$(/usr/bin/dirname "$DS")
+	if [ "$parentds" != "$baseds" ]; then
+		$ZFS set canmount=noauto "$parentds"
+		check_failure $? "Unable to set canmount on $parentds" $SMF_FMRI fatal
+	fi
+
+	$ZFS mount "$DS"
+	check_failure $? "Unable to mount $DS" $SMF_FMRI fatal
+
+	$ZFS allow pkg5srv create,mount,canmount,snapshot "$DS"
 	check_failure $? \
-	    "Unable to delegate ZFS permissions on $pool/$dataset" \
+	    "Unable to delegate ZFS permissions on $DS" \
 	    $SMF_FMRI fatal
 
 	$CHOWN pkg5srv:pkg5srv "$mp"

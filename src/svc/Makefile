@@ -24,12 +24,18 @@ ROOTSHAREDIR = $(ROOTLIBSVC)/share
 DIRS = $(ROOTMANIFESTDIR) $(ROOTMETHODDIR) $(ROOTSHAREDIR)
 
 MANIFESTS = \
+	pkg-depot.xml \
+	pkg-system-repository.xml \
+	zoneproxy-client.xml \
+	zoneproxyd.xml \
 	pkg-mdns.xml \
 	pkg-mirror.xml \
 	pkg-repositories-setup.xml \
 	pkg-server.xml
 
 METHODS = \
+	svc-pkg-depot \
+	svc-pkg-sysrepo \
 	svc-pkg-mdns \
 	svc-pkg-mirror \
 	svc-pkg-repositories-setup \

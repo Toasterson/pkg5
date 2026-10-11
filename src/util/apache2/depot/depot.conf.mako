@@ -23,15 +23,13 @@
 #
 
 #
-# This file is the template for an Apache configuration that serves pkg(7)
+# This file is the template for an Apache configuration that serves pkg(5)
 # repositories.  On its own, it can be used to render a fragment that can be
 # dropped into an Apache conf.d directory, or it can be referenced from
 # a more complete httpd.conf template via an include directive.
 #
 </%doc>
 RewriteEngine on
-RewriteLog "${log_dir}/rewrite.log"
-RewriteLogLevel 0
 
 # We need to allow these as they're encoded in the package/manifest names
 # when looking up v4 repositories
@@ -80,7 +78,7 @@ for repo_prefix in repo_prefixes:
 #
 <%
         for pub, repo_path, repo_prefix in default_pubs:
-                if pub is None:
+                if pub == None:
                         continue
                 root = context.get("sroot")
                 # manifest rules need to use %{THE_REQUEST} undecoded
@@ -205,9 +203,7 @@ for pub, repo_path, repo_prefix, writable_root in pubs:
 for repo_path, repo_prefix in paths:
         context.write("# an alias to serve {repo_path} content.\n"
             "<Directory \"{repo_path}\">\n"
-            "    AllowOverride None\n"
-            "    Order allow,deny\n"
-            "    Allow from all\n"
+            "    Require all granted\n"
             "</Directory>\n".format(**locals()))
 %>
 
@@ -228,9 +224,7 @@ for repo_prefix in repo_prefixes:
                      **locals()))
                 context.write(
                     "<Directory \"{runtime_dir}/htdocs\">\n"
-                    "    AllowOverride None\n"
-                    "    Order allow,deny\n"
-                    "    Allow from all\n"
+                    "    Require all granted\n"
                     "</Directory>\n".format(**locals()))
 %>
 
