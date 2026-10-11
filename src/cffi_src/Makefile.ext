@@ -15,14 +15,13 @@
 
 include ../../../Makefile.com
 
-SUSEPY.cmd = echo $(USEPY) | tr -d .
-SUSEPY = $(SUSEPY.cmd:sh)
+PYEXTSUFFIX.cmd = python$(USEPY)-config --extension-suffix
 
 ROOTPYPKG= $(ROOT)/usr/lib/python$(USEPY)/vendor-packages/pkg
 
 EXTENSIONS= arch sha512_t sysattr syscallat
 SOURCES= $(EXTENSIONS:%=_%.c)
-SOBJ= $(EXTENSIONS:%=_%.cpython-$(SUSEPY)-$(TRIPLET).so)
+SOBJ= $(EXTENSIONS:%=_%$(PYEXTSUFFIX))
 ROOTSOBJ = $(SOBJ:%=$(ROOTPYPKG)/%)
 
 all: $(SOURCES)

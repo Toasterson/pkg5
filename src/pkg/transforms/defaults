@@ -98,6 +98,16 @@
 <transform dir file link hardlink path=usr.*/man(/.+){0,1}$ -> \
     default facet.doc.man true>
 
+# only set the info.repository-* values for packages we're responsible for
+<transform pkg pkg.fmri=pkg:/package/.* -> default info.repository-changeset $(CHANGESET)>
+<transform pkg pkg.fmri=pkg:/package/.* -> default info.repository-url https://github.com/OpenIndiana/pkg5/>
+<transform pkg pkg.fmri=pkg:/system/zones.* -> default info.repository-changeset $(CHANGESET)>
+<transform pkg pkg.fmri=pkg:/system/zones.* -> default info.repository-url https://github.com/OpenIndiana/pkg5/>
+<transform pkg pkg.fmri=pkg:/developer/opensolaris/pkg5 -> default info.repository-changeset $(CHANGESET)>
+<transform pkg pkg.fmri=pkg:/developer/opensolaris/pkg5 -> default info.repository-url https://github.com/OpenIndiana/pkg5/>
+# now emit those values
+<transform pkg info.repository-changeset=(.*) -> emit set name=info.repository-changeset value=%<1>>
+<transform pkg info.repository-url=(.*) -> emit set name=info.repository-url value=%<1>>
 set name=org.opensolaris.consolidation value=ips
 set name=variant.opensolaris.zone value=global value=nonglobal
 

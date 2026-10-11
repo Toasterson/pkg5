@@ -27,23 +27,16 @@ include ../Makefile.com
 
 PKGVERS_COMPONENT = 0.5.11
 PKGVERS_BUILTON   = 5.11
-BUILDNUM.cmd      = \
-	awk -F= '$$1 == "BUILD_ID" { split($$2, a, "."); print a[1] }' \
-	/etc/os-release
-BUILDNUM          = $(BUILDNUM.cmd:sh)
 UPDATENUM         = 0
 SRUNUM            = 0
 PLATNUM           = 0
-BUILDID           = 0
+BUILDID           = 151
 NIGHTLYID         = 1
 CHANGESET.cmd     = git show --format=%h --no-patch
 CHANGESET         = $(CHANGESET.cmd:sh)
-CURBUILD.cmd      = \
-	$(PKG) -R / list -H osnet-incorporation | \
-		sed -e 's/.*-0\.\([^ .]*\).*/\1/'
-CURBUILD          = $(CURBUILD.cmd:sh)
-PKGVERS_BRANCH    = $(BUILDNUM).0
-PKGVERS           = $(PKGVERS_COMPONENT),$(PKGVERS_BUILTON)-$(PKGVERS_BRANCH)
+BUILD_VERSION     = $(PKGVERS_BUILTON)-0.151.1.8.1
+PKGVERS_BRANCH    = $(BUILD_VERSION:5.11-%=%)
+PKGVERS           = $(PKGVERS_COMPONENT),$(BUILD_VERSION)
 ARCH              = $(TARGET_ARCH:-%=%)
 REV:sh            = date +%Y.%m.%d.%H.%M.%S
 
@@ -60,22 +53,37 @@ PKGPUBLISHER_LOCALIZABLE      = pkg5-localizable
 PRE_POUND         = pre\#
 POUND_SIGN        = $(PRE_POUND:pre\%=%)
 PUBLISHALL        = $(POUND_SIGN)
+# Only the active top-level manifests are published. Keep legacy/ excluded.
+MANIFEST_FILES.cmd = \
+	cd manifests || exit 1; \
+	for name in *.p5m; do \
+		case $$name in \
+		    system:zones:brand:emu.p5m|system:zones:brand:illumos.p5m|\
+		    system:zones:brand:lipkg.p5m|system:zones:brand:lx.p5m|\
+		    system:zones:brand:pkgsrc.p5m|system:zones:brand:sparse.p5m|\
+		    SUNWipkg-gui-l10n.p5m|system:trusted:trusted-nonglobal.p5m) ;; \
+		    *) print $$name ;; \
+		esac; \
+	done
+MANIFEST_FILES = $(MANIFEST_FILES.cmd:sh)
 # This won't work if we obsolete a package in an update build, but shouldn't be
 # necessary after we stop publishing duplicate packages.
 MANIFESTS.cmd     = \
-	cd manifests; \
+	cd manifests || exit 1; \
 	buildnum=$(BUILDID); \
-	m=$$($(PKGMOGRIFY) -I ../generated -O /dev/null \
-	    *.p5m ../transforms/nopublish); \
+	if ! m=$$($(PKGMOGRIFY) -O /dev/null \
+	    $(MANIFEST_FILES) ../transforms/nopublish); then \
+		echo "ERROR: pkgmogrify failed while computing MANIFESTS." >&2; \
+		echo "       Expected tool at $(PKGROOT)/usr/bin/pkgmogrify" >&2; \
+		echo "       Is the proto area built? Run 'make install' in src/ first." >&2; \
+		exit 1; \
+	fi; \
 	echo "$$m" | while read name build; do \
 		[[ $$build -ge $${buildnum%%.*} ]] && echo $$name; \
-	done | sed -e 's/:/\\:/g'; \
-	exit 0
+	done | sed -e 's/:/\\:/g'
 MANIFESTS         = $(MANIFESTS.cmd:sh)
 ALL_MANIFESTS:sh  = \
-	cd manifests; \
-	print *.p5m | sed -e 's/:/\\:/g'; \
-	exit 0
+	print $(MANIFEST_FILES) | sed -e 's/:/\\:/g'
 $(PUBLISHALL)MANIFESTS      = $(ALL_MANIFESTS)
 
 PYTHON3           = python$(PYVER)
@@ -83,13 +91,12 @@ PYDEDOT.cmd       = echo $(PYVER) | tr -d .
 PYPKGVERS         = -$(PYDEDOT.cmd:sh)
 PYDIR             = usr/lib/$(PYTHON3)
 PYDIRVP           = $(PYDIR)/vendor-packages
-PYSHLIB		  = usr/lib/pkg/$(PYTHON3)
 
 # PKGCMDENV needs to specify the interpreter explicitly since the shebang
 # lines include -Es which suppresses the use of non-default environments.
 PKGCMDENV         = \
 	PATH=$(PKGROOT)/usr/bin:/usr/sbin:/usr/bin \
-	PYTHONPATH=$(PKGROOT)/$(PYSHLIB):$(PKGROOT)/$(PYDIRVP) \
+	PYTHONPATH=$(PKGROOT)/$(PYDIRVP) \
 	    $(PYTHON3) -s $(PKGROOT)/usr/bin
 
 PKG               = $(PKGCMDENV)/pkg
@@ -107,8 +114,6 @@ DEPENDED          = $(MANIFESTS:%.p5m=$(PDIR)/%.dep)
 INCORP            = consolidation\:ips\:ips-incorporation
 
 PM_TRANSFORMS     = defaults
-# For python version migrations
-#PM_TRANSFORMS     += pynext
 
 i386_DEFINES      = \
 	i386_ONLY=''    \
@@ -127,18 +132,13 @@ sparc_DEFINES     = \
 
 ARCH_DEFINES      = $($(ARCH)_DEFINES)
 
-i386_TRIPLE       = x86_64-pc-solaris2
-aarch64_TRIPLE    = aarch64-unknown-solaris2
-
-ARCH_TRIPLE       = $($(ARCH)_TRIPLE)
-
 PKGMOG_DEFVALS    = \
 	ARCH=$(ARCH) \
 	PKGVERS_COMPONENT=$(PKGVERS_COMPONENT) \
 	PKGVERS_BUILTON=$(PKGVERS_BUILTON) \
 	PKGVERS_BRANCH=$(PKGVERS_BRANCH) \
 	PKGVERS=$(PKGVERS) \
-	TRIPLE=$(ARCH_TRIPLE) \
+	PYEXTSUFFIX=$(PYEXTSUFFIX) \
 	REV=$(REV) \
 	PYDIR=$(PYDIR) \
 	PYDIRVP=$(PYDIRVP) \
@@ -150,7 +150,7 @@ PKGMOG_DEFINES    = $(PKGMOG_DEFVALS:%=-D %)
 PKGMOG_DEFINES    += $(ARCH_DEFINES:%=-D %)
 
 all: $(MOGRIFESTS)
-install: lint
+install: repository-metadata $(PDIR) lint
 
 clean:
 	rm -rf $(PDIR)
@@ -159,7 +159,7 @@ clobber: clean
 	rm -rf $(PKGDEST) Makefile.link
 
 pkgfmt:
-	$(PKGFMT) -fv2 -c manifests/*.p5m
+	$(PKGFMT) -fv2 -c $(MANIFEST_FILES:%=manifests/%)
 
 $(PDIR):
 	mkdir -p $@
@@ -191,7 +191,7 @@ $(PKGDEST)/repo:
 $(PDIR)/%.mog: manifests/%.p5m $(PM_TRANSFORMS:%=transforms/%) $(PDIR) \
 	$(PM_TRANSFORMS:%=transforms/%)
 	$(PKGMOGRIFY) $(PKGMOG_DEFINES) \
-	-I generated -I transforms \
+	-I transforms \
 	-O $@ $< $(PM_TRANSFORMS)
 
 # The main dependency generation rule
@@ -289,7 +289,7 @@ lint: repository-metadata $(PDIR)
 # to pkgsend generate.
 TARGETS.cmd       = \
 	$(PKGMOGRIFY) -O /dev/null transforms/find-links $(MOGRIFESTS) | \
-		python -c 'import os, sys; print(" ".join(("--target " + os.path.normpath(os.path.join(os.path.dirname(p), t)) for p, t in (l.strip().split() for l in sys.stdin.readlines()))))'
+		$(PYTHON3) -c 'import os, sys; print(" ".join(("--target " + os.path.normpath(os.path.join(os.path.dirname(p), t)) for p, t in (l.strip().split() for l in sys.stdin.readlines()))))'
 
 # Create a pseudo-manifest of the proto area
 $(PDIR)/protomanifest: FRC transforms/compare-strip $(PDIR)

@@ -1,0 +1,61 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License (the "License").
+# You may not use this file except in compliance with the License.
+#
+# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+# or http://www.opensolaris.org/os/licensing.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information: Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+# Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
+#
+
+set name=pkg.fmri value=pkg:/developer/opensolaris/pkg5@$(PKGVERS)
+set name=pkg.summary value="Dependencies required to build the pkg(5) project"
+set name=pkg.description \
+    value="This package should be installed on systems used for development of the pkg(5) project"
+set name=info.classification \
+    value="org.opensolaris.category.2008:Development/Distribution Tools"
+depend type=require fmri=pkg:/developer/build/make
+depend type=require fmri=pkg:/developer/build/onbld
+depend type=require fmri=pkg:/developer/build/pkg-config
+depend type=require fmri=pkg:/gnome/gnome-common
+depend type=require fmri=pkg:/library/python/cffi$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/cherrypy$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/coverage$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/cryptography$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/jsonrpclib-pelix$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/jsonschema$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/mako$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/ply$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/portend$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/prettytable$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/pybonjour$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/pycurl$(PYPKGVERS)
+depend type=require fmri=pkg:/library/python/pylint
+depend type=require fmri=pkg:/library/python/python-rapidjson$(PYPKGVERS)
+depend type=require fmri=pkg:/package/svr4
+depend type=require fmri=pkg:/runtime/python$(PYPKGVERS)
+depend type=require fmri=pkg:/service/network/dns/mdns
+depend type=require fmri=pkg:/system/header
+depend type=require fmri=pkg:/system/zones
+depend type=require fmri=pkg:/text/gnu-diffutils
+depend type=require fmri=pkg:/text/gnu-gettext
+depend type=require fmri=pkg:/text/intltool
+depend type=require fmri=pkg:/text/locale
+depend type=require fmri=pkg:/text/tidy
+depend type=require fmri=pkg:/web/server/apache-24
+# p5p support in the system repository requires mod_wsgi
+depend type=require fmri=pkg:/web/server/apache-24/module/apache-wsgi$(PYPKGVERS)
+depend type=require fmri=pkg:/web/wget

@@ -20,16 +20,15 @@
 
 include ../../../Makefile.com
 
-SUSEPY.cmd = echo $(USEPY) | tr -d .
-SUSEPY = $(SUSEPY.cmd:sh)
+PYEXTSUFFIX.cmd = python$(USEPY)-config --extension-suffix
 
 ROOTPYPKG= $(ROOT)/usr/lib/python$(USEPY)/vendor-packages/pkg
 
 EXTENSIONS= arch sha512_t sysattr syscallat
-SOBJ= $(EXTENSIONS:%=_%.cpython-$(SUSEPY)-$(TRIPLET).so)
+SOBJ= $(EXTENSIONS:%=_%$(PYEXTSUFFIX))
 
-_sha512_t.cpython-%.so		:= LDFLAGS = -lmd
-_sysattr.cpython-%.so		:= LDFLAGS = -lnvpair
+_sha512_t$(PYEXTSUFFIX)		:= LDFLAGS = -lmd
+_sysattr$(PYEXTSUFFIX)		:= LDFLAGS = -lnvpair
 
 all: $(SOBJ)
 
@@ -46,7 +45,7 @@ $(ROOTPYPKG)/%.so: %.so
 	$(MKDIR) $(@D)
 	$(RM) $@; $(INSTALL) -f $(@D) -m 0555 $<
 
-%.cpython-$(SUSEPY)-$(TRIPLET).so: %.c
+%$(PYEXTSUFFIX): %.c
 	$(CC) -shared -fPIC $< $(PYCFLAGS) $(PYLDFLAGS) $(LDFLAGS) -o $@
 
 FRC:

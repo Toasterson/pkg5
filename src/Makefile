@@ -33,10 +33,7 @@ JOBS = 8
 # versions (in PYVERSIONS). In rules the target python version can be picked
 # up via $(@F).
 PYTESTS = $(PYVERSIONS:%=runtest/%)
-EXTMODULES = $(PYVERSIONS:%=extmodules/%)
 TESTRESULTS = $(PYVERSIONS:%=testresults/%)
-
-REQUIREMENTS = requirements.txt
 
 TARGET = all
 all := TARGET = all
@@ -48,12 +45,12 @@ check := TARGET = check
 packages := TARGET = install
 test := TARGET = install
 
-SUBDIRS= cffi_src modules brand util man po svc web
-brand: cffi_src modules util $(EXTMODULES)
+SUBDIRS= cffi_src modules brand util man po svc web zoneproxy
+brand: cffi_src modules util
 
 all: $(SUBDIRS)
 
-install: install-cmd $(SUBDIRS) $(EXTMODULES)
+install: install-cmd $(SUBDIRS)
 
 clean clobber: $(SUBDIRS) pkg
 
@@ -85,11 +82,7 @@ $(SUBDIRS) pkg: FRC
 install-cmd: FRC
 	$(MAKE) -f Makefile.cmd $(TARGET)
 
-$(EXTMODULES):
-	../tools/installmodules $(CODE_WS) $(ROOT) $(@F) \
-	    $(TARGET) $(ROOTPKGLIB) core $(REQUIREMENTS)
-
-$(PYTESTS): $(EXTMODULES)
+$(PYTESTS):
 	-pfexec python$(@F) tests/run.py -t -j $(JOBS)
 	-pfexec cp tests/failures.3 tests/failures.$(@F)
 	-pfexec cp tests/timing_info.txt tests/timing_info.$(@F)

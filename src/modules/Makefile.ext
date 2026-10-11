@@ -15,8 +15,7 @@
 
 include ../Makefile.com
 
-SUSEPY.cmd = echo $(USEPY) | tr -d .
-SUSEPY = $(SUSEPY.cmd:sh)
+PYEXTSUFFIX.cmd = python$(USEPY)-config --extension-suffix
 
 PYCFLAGS.cmd = python$(USEPY)-config --cflags
 PYLDFLAGS.cmd = python$(USEPY)-config --ldflags
@@ -26,23 +25,23 @@ PYLDFLAGS = $(PYLDFLAGS.cmd:sh)
 ROOTPYPKG= $(ROOT)/usr/lib/python$(USEPY)/vendor-packages/pkg
 
 EXTENSIONS= actions/_actions actions/_common _varcet _misc solver elf
-SOBJ= $(EXTENSIONS:%=%.cpython-$(SUSEPY)-$(TRIPLET).so)
+SOBJ= $(EXTENSIONS:%=%$(PYEXTSUFFIX))
 
-actions/_actions.cpython-%.so	:= SOURCES = actions/_actions.c
-actions/_common.cpython-%.so	:= SOURCES = actions/_common.c
-_varcet.cpython-%.so		:= SOURCES = _varcet.c
-_misc.cpython-%.so		:= SOURCES = _misc.c
+actions/_actions$(PYEXTSUFFIX)	:= SOURCES = actions/_actions.c
+actions/_common$(PYEXTSUFFIX)	:= SOURCES = actions/_common.c
+_varcet$(PYEXTSUFFIX)		:= SOURCES = _varcet.c
+_misc$(PYEXTSUFFIX)		:= SOURCES = _misc.c
 
-elf.cpython-%.so		:= SOURCES = elf.c elfextract.c liblist.c
-elf.cpython-%.so		:= CPPFLAGS = -I.
-elf.cpython-%.so		:= LDFLAGS = -lelf -lmd
+elf$(PYEXTSUFFIX)		:= SOURCES = elf.c elfextract.c liblist.c
+elf$(PYEXTSUFFIX)		:= CPPFLAGS = -I.
+elf$(PYEXTSUFFIX)		:= LDFLAGS = -lelf -lmd
 
-solver.cpython-%.so		:= SOURCES = solver/solver.c solver/py_solver.c
-solver.cpython-%.so		:= CPPFLAGS = -D_FILE_OFFSET_BITS=64
-solver.cpython-%.so		:= CERRWARN = \
+solver$(PYEXTSUFFIX)		:= SOURCES = solver/solver.c solver/py_solver.c
+solver$(PYEXTSUFFIX)		:= CPPFLAGS = -D_FILE_OFFSET_BITS=64
+solver$(PYEXTSUFFIX)		:= CERRWARN = \
 					-Wno-strict-aliasing \
 					-Wno-unused-function
-solver.cpython-%.so		:= LDFLAGS = -ztext -lm -lc
+solver$(PYEXTSUFFIX)		:= LDFLAGS = -ztext -lm -lc
 
 all: $(SOBJ)
 

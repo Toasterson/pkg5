@@ -26,19 +26,23 @@ ROOTUSRSHARE = $(ROOT)/usr/share
 ROOTUSRSHARELOCALE = $(ROOTUSRSHARE)/locale
 ROOTBRAND = $(ROOTUSRLIB)/brand
 ROOTPKGLIB = $(ROOTUSRLIB)/pkg
-TRIPLET = x86_64-pc-solaris2
 
-CC = /usr/bin/gcc-15
+CC = /usr/gcc/14/bin/gcc
 CFLAGS_i386 = -m64
 CFLAGS_aarch64 =
 CFLAGS = $(CFLAGS_$(MACH)) -Wall -Werror -Wextra -gdwarf-2 -gstrict-dwarf \
 	-fno-aggressive-loop-optimizations
 CPPFLAGS = -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS
 
+# Default interpreter; override both versions to build and package for 3.9.
 # Whitespace separated list of versions to build and test.
-PYVERSIONS = 3.13
+PYVERSIONS = 3.14
 # The single version used for shebang lines and packaging.
-PYVER = 3.13
+PYVER = 3.14
+
+# Packaging uses PYVER; extension sub-makes override the command with USEPY.
+PYEXTSUFFIX.cmd = python$(PYVER)-config --extension-suffix
+PYEXTSUFFIX = $(PYEXTSUFFIX.cmd:sh)
 
 SHELL= /usr/bin/ksh93
 INSTALL = /usr/sbin/install
