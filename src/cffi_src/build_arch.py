@@ -29,11 +29,14 @@ from cffi import FFI
 
 ffi = FFI()
 
-ffi.set_source("_arch", """
+ffi.set_source(
+    "_arch",
+    """
 /* Includes */
 #include <sys/systeminfo.h>
 #include <stdlib.h>
-""")
+""",
+)
 
 ffi.cdef("""
 /* Macros */

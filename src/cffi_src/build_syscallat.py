@@ -29,13 +29,16 @@ from cffi import FFI
 
 ffi = FFI()
 
-ffi.set_source("_syscallat", """
+ffi.set_source(
+    "_syscallat",
+    """
 /* Includes */
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-""")
+""",
+)
 
 ffi.cdef("""
 /* Types */

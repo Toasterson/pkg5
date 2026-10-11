@@ -28,34 +28,38 @@ from __future__ import print_function
 import pkg.fmri
 import sys
 
+
 def usage():
-        print("usage: %s <fmri1> <fmri2>".format(sys.argv[0]), file=sys.stderr)
-        sys.exit(2)
+    print("usage: %s <fmri1> <fmri2>".format(sys.argv[0]), file=sys.stderr)
+    sys.exit(2)
+
 
 if len(sys.argv) != 3:
-        usage()
+    usage()
 
 try:
-        x = pkg.fmri.PkgFmri(sys.argv[1])
-        y = pkg.fmri.PkgFmri(sys.argv[2])
+    x = pkg.fmri.PkgFmri(sys.argv[1])
+    y = pkg.fmri.PkgFmri(sys.argv[2])
 except pkg.fmri.FmriError as e:
-        print ("error: %s" % str(e) , file=sys.stderr)
-        sys.exit(1)
+    print("error: %s" % str(e), file=sys.stderr)
+    sys.exit(1)
 
 if not x.is_same_pkg(y):
-        print ("error: can only compare two versions of the same package.",
-            file=sys.stderr)
-        sys.exit(1)
+    print(
+        "error: can only compare two versions of the same package.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 if x < y:
-        print("<")
+    print("<")
 elif x > y:
-        print(">")
+    print(">")
 elif x == y:
-        print("=")
+    print("=")
 else:
-        print ("panic", file=sys.stderr)
-        sys.exit(1)
+    print("panic", file=sys.stderr)
+    sys.exit(1)
 
 sys.exit(0)
 

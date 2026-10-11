@@ -25,8 +25,8 @@
 #
 
 
-"""an_first_timestamp.py - read first line of an Apache HTTPD log, and print 
-   Unix timestamp"""
+"""an_first_timestamp.py - read first line of an Apache HTTPD log, and print
+Unix timestamp"""
 
 from __future__ import print_function
 import datetime
@@ -37,23 +37,31 @@ import time
 
 # Apache combined log pattern
 #   Canonical version is in an_report.py
-comb_log_pat = re.compile(r"(?P<ip>[\d\.]*) - - \[(?P<date>[^:]*):(?P<time>\S*) (?P<tz>[^\]]*)\] \"(?P<op>GET|POST|HEAD|\S*) (?P<uri>\S*) HTTP/(?P<httpver>[^\"]*)\" (?P<response>\d*) (?P<subcode>\d*|-) \"(?P<refer>[^\"]*)\" \"(?P<agent>[^\"]*)\"")
+comb_log_pat = re.compile(
+    r"(?P<ip>[\d\.]*) - - \[(?P<date>[^:]*):(?P<time>\S*) (?P<tz>[^\]]*)\] \"(?P<op>GET|POST|HEAD|\S*) (?P<uri>\S*) HTTP/(?P<httpver>[^\"]*)\" (?P<response>\d*) (?P<subcode>\d*|-) \"(?P<refer>[^\"]*)\" \"(?P<agent>[^\"]*)\""
+)
 
 lastdate = None
 lastdatetime = None
 printed = False
 
 for l in fileinput.input(sys.argv[1:]):
-        m = comb_log_pat.search(l)
-        if not m:
-                continue
+    m = comb_log_pat.search(l)
+    if not m:
+        continue
 
-        mg = m.groupdict()
+    mg = m.groupdict()
 
-        d = datetime.datetime(*(time.strptime(mg["date"] + ":" + mg["time"], "%d/%b/%Y:%H:%M:%S")[0:6]))
+    d = datetime.datetime(
+        *(
+            time.strptime(mg["date"] + ":" + mg["time"], "%d/%b/%Y:%H:%M:%S")[
+                0:6
+            ]
+        )
+    )
 
-        print("{0:d}".format(time.mktime(d.timetuple())))
-        sys.exit(0)
+    print("{0:d}".format(time.mktime(d.timetuple())))
+    sys.exit(0)
 
 
 # Vim hints

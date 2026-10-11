@@ -30,11 +30,14 @@ from cffi import FFI
 
 ffi = FFI()
 
-ffi.set_source("_sha512_t", """
+ffi.set_source(
+    "_sha512_t",
+    """
 /* Includes */
 #include <sys/sha2.h>
 #include <string.h>
-""")
+""",
+)
 
 ffi.cdef("""
 #define	SHA512_224 9

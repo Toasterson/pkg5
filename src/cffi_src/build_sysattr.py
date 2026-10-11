@@ -29,14 +29,17 @@ from cffi import FFI
 
 ffi = FFI()
 
-ffi.set_source("_sysattr", """
+ffi.set_source(
+    "_sysattr",
+    """
 /* Includes */
 #include <attr.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/nvpair.h>
-""")
+""",
+)
 
 ffi.cdef("""
 /* Macros */

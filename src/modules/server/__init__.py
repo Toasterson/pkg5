@@ -26,8 +26,15 @@
 
 from __future__ import unicode_literals
 
-__all__ = ["catalog", "config", "depot", "face", "feed", "repository",
-    "transaction"]
+__all__ = [
+    "catalog",
+    "config",
+    "depot",
+    "face",
+    "feed",
+    "repository",
+    "transaction",
+]
 
 # Vim hints
 # vim:ts=8:sw=8:et:fdm=marker

@@ -40,12 +40,20 @@ import time
 
 import pkg.lockfile as lockfile
 
-class CfgFile(object):
-    """ Solaris configuration file editor... make it easier to
-        modify Solaris line-oriented configuration files from actions """
 
-    def __init__(self, filename, separator, column_names, keys,
-                 comment_match="#", continuation_lines=False):
+class CfgFile(object):
+    """Solaris configuration file editor... make it easier to
+    modify Solaris line-oriented configuration files from actions"""
+
+    def __init__(
+        self,
+        filename,
+        separator,
+        column_names,
+        keys,
+        comment_match="#",
+        continuation_lines=False,
+    ):
 
         self.filename = filename
         self.separator = separator
@@ -58,7 +66,7 @@ class CfgFile(object):
         self.default_values = dict((e[2], e[1]) for e in l)
 
         self.comment_regexp = re.compile(comment_match)
-        self.max_lengths=dict((n, 8) for n in self.column_names)
+        self.max_lengths = dict((n, 8) for n in self.column_names)
 
         if isinstance(keys, str):
             self.keys = [keys]
@@ -67,11 +75,12 @@ class CfgFile(object):
 
         self.index = {}
 
-        assert(set(self.column_names) >= set(self.keys))
+        assert set(self.column_names) >= set(self.keys)
 
     def __str__(self):
         return "CfgFile({0}):{1}:{2}:{3}".format(
-            self.filename, self.keys, self.column_names, self.index)
+            self.filename, self.keys, self.column_names, self.index
+        )
 
     def getcolumnnames(self):
         return self.column_names
@@ -83,19 +92,18 @@ class CfgFile(object):
         return line.split(self.separator)
 
     def getfilelines(self):
-        """ given self, return list of lines to be printed.
-            default impl preserves orignal + insertion order"""
-        lines = [[self.index[l][2],self.index[l][0]] for l in self.index]
+        """given self, return list of lines to be printed.
+        default impl preserves orignal + insertion order"""
+        lines = [[self.index[l][2], self.index[l][0]] for l in self.index]
         lines.sort()
         return [l[1] for l in lines]
-
 
     def readfile(self):
         if os.path.exists(self.filename):
             file = open(self.filename)
             lineno = 1
             for line in file:
-                linecnt = 1;
+                linecnt = 1
 
                 while self.continuation_lines and line[-2:] == "\\\n":
                     linecnt += 1
@@ -103,14 +111,16 @@ class CfgFile(object):
 
                 line = line.rstrip("\n")
                 if self.iscommentline(line):
-                    self.index[lineno] = \
-                        (line, None, lineno)
+                    self.index[lineno] = (line, None, lineno)
                 else:
                     cols = self.splitline(line)
                     if len(cols) == len(self.column_names):
                         dic = dict(zip(self.column_names, cols))
-                        self.index[tuple(dic[k] for k in self.keys)] = \
-                            (line, dic, lineno)
+                        self.index[tuple(dic[k] for k in self.keys)] = (
+                            line,
+                            dic,
+                            lineno,
+                        )
                     else:
                         self.index[lineno] = (line, None, lineno)
                 lineno += linecnt
@@ -118,10 +128,10 @@ class CfgFile(object):
             self.needswriting = False
 
     def getvalue(self, template):
-        """ returns one (first) entry matched by the template which must contain
-            all the keys and expected values as defined for the current CfgFile
-            instance; for implementations in this source file, each use-case
-            has one key (usually "username") """
+        """returns one (first) entry matched by the template which must contain
+        all the keys and expected values as defined for the current CfgFile
+        instance; for implementations in this source file, each use-case
+        has one key (usually "username")"""
         val = self.index.get(tuple(template[k] for k in self.keys), None)
         if val:
             return val[1]
@@ -129,34 +139,52 @@ class CfgFile(object):
             return {}
 
     def getvalues(self, template):
-        """ returns an array with zero or more hits to all key-values specified
-            in the template, and the requested keys do not have to be the ones
-            indexed in the self.keys; more than one hit is possible e.g. if a
-            password database contains several names for same UID and the query
-            is just for UID number """
+        """returns an array with zero or more hits to all key-values specified
+        in the template, and the requested keys do not have to be the ones
+        indexed in the self.keys; more than one hit is possible e.g. if a
+        password database contains several names for same UID and the query
+        is just for UID number"""
         vals = []
         for valkey in self.index:
             val = self.index.get(valkey)[1]
-            if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+            if (
+                "PKG_ACCOUNTS_DEBUG" in os.environ
+                and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+            ):
                 print("[D] val: ", val)
             hit = None
             for k in template:
-                if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+                if (
+                    "PKG_ACCOUNTS_DEBUG" in os.environ
+                    and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+                ):
                     print("[D]     key: %s\tseekval: %s" % (k, template[k]))
                 if val is not None and k in val:
-                    if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+                    if (
+                        "PKG_ACCOUNTS_DEBUG" in os.environ
+                        and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+                    ):
                         print("    val[k]: %s" % (val[k]))
                     ### str() allows e.g. uid in template to be a numeric type
                     if str(val[k]) == str(template[k]) and hit is not False:
-                        if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+                        if (
+                            "PKG_ACCOUNTS_DEBUG" in os.environ
+                            and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+                        ):
                             print("[D]     HAVE A HIT!")
                         hit = True
                     else:
-                        if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+                        if (
+                            "PKG_ACCOUNTS_DEBUG" in os.environ
+                            and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+                        ):
                             print("[D]     LOST A HIT (val[k] mismatched)")
                         hit = False
                 else:
-                    if "PKG_ACCOUNTS_DEBUG" in os.environ and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose":
+                    if (
+                        "PKG_ACCOUNTS_DEBUG" in os.environ
+                        and os.environ["PKG_ACCOUNTS_DEBUG"] == "verbose"
+                    ):
                         print("[D]     LOST A HIT (k not in val)")
                     hit = False
             if hit:
@@ -164,15 +192,17 @@ class CfgFile(object):
         return vals
 
     def getdefaultvalues(self):
-        """ returns dictionary of default string values - ignores
-        other types """
-        return dict((i, self.default_values[i])
-                    for i in self.default_values
-                    if isinstance(self.default_values[i], str))
+        """returns dictionary of default string values - ignores
+        other types"""
+        return dict(
+            (i, self.default_values[i])
+            for i in self.default_values
+            if isinstance(self.default_values[i], str)
+        )
 
     def updatevalue(self, template):
-        """ update existing record, using orig values if missing
-            in template"""
+        """update existing record, using orig values if missing
+        in template"""
         orig = self.index[tuple(template[k] for k in self.keys)].copy()
         for name in self.column_names:
             if name in template:
@@ -180,14 +210,15 @@ class CfgFile(object):
         self.setvalue(orig)
 
     def setvalue(self, template):
-        """ set value of record in file, replacing any previous def.
-            for any missing info, use defaults.  Will insert new value """
+        """set value of record in file, replacing any previous def.
+        for any missing info, use defaults.  Will insert new value"""
         # bring in any missing values as defaults if not None
         for field in self.column_names:
             if field not in template:
                 if self.default_values[field] is None:
                     raise RuntimeError(
-                        "Required attribute {0} is missing".format(field))
+                        "Required attribute {0} is missing".format(field)
+                    )
                 elif hasattr(self.default_values[field], "__call__"):
                     template[field] = self.default_values[field]()
                 else:
@@ -203,8 +234,11 @@ class CfgFile(object):
         else:
             lineno = 0
         line = self.valuetostr(template)
-        self.index[tuple(template[k] for k in self.keys)] = \
-            (line, template, lineno)
+        self.index[tuple(template[k] for k in self.keys)] = (
+            line,
+            template,
+            lineno,
+        )
         self.needswriting = True
 
     def removevalue(self, template):
@@ -212,11 +246,12 @@ class CfgFile(object):
         self.needswriting = True
 
     def valuetostr(self, template):
-        """ print out values in file format """
-        return("{0}".format(self.separator.join(
-            [
-                "{0}".format(template[key]) for key in self.column_names
-            ])))
+        """print out values in file format"""
+        return "{0}".format(
+            self.separator.join(
+                ["{0}".format(template[key]) for key in self.column_names]
+            )
+        )
 
     def writefile(self):
 
@@ -239,69 +274,81 @@ class CfgFile(object):
 
         os.rename(name, self.filename)
 
+
 class PasswordFile(CfgFile):
     """Manage the passwd and shadow together. Note that
-       insertion/deletion of +/- fields isn't supported"""
+    insertion/deletion of +/- fields isn't supported"""
+
     def __init__(self, path_prefix, lock=False):
-        self.password_file = \
-            CfgFile(os.path.join(path_prefix, "etc/passwd"),
-                    ":",
-                    {"username"   : (1, None),
-                     "password"   : (2, "x"),
-                     "uid"        : (3, None),
-                     "gid"        : (4, None),
-                     "gcos-field" : (5, "& User"),
-                     "home-dir"   : (6, "/"),
-                     "login-shell": (7, "")
-                     },
-                    "username", comment_match="[-+]")
+        self.password_file = CfgFile(
+            os.path.join(path_prefix, "etc/passwd"),
+            ":",
+            {
+                "username": (1, None),
+                "password": (2, "x"),
+                "uid": (3, None),
+                "gid": (4, None),
+                "gcos-field": (5, "& User"),
+                "home-dir": (6, "/"),
+                "login-shell": (7, ""),
+            },
+            "username",
+            comment_match="[-+]",
+        )
         days = datetime.timedelta(seconds=time.time()).days
-        self.shadow_file = \
-            CfgFile(os.path.join(path_prefix, "etc/shadow"),
-                    ":",
-                    {"username"   : (1, None),
-                     "password"   : (2, "*LK*"),
-                     "lastchg"    : (3, days),
-                     "min"        : (4, ""),
-                     "max"        : (5, ""),
-                     "warn"       : (6, ""),
-                     "inactive"   : (7, ""),
-                     "expire"     : (8, ""),
-                     "flag"       : (9, "")
-                     },
-                    "username", comment_match="[-+]")
+        self.shadow_file = CfgFile(
+            os.path.join(path_prefix, "etc/shadow"),
+            ":",
+            {
+                "username": (1, None),
+                "password": (2, "*LK*"),
+                "lastchg": (3, days),
+                "min": (4, ""),
+                "max": (5, ""),
+                "warn": (6, ""),
+                "inactive": (7, ""),
+                "expire": (8, ""),
+                "flag": (9, ""),
+            },
+            "username",
+            comment_match="[-+]",
+        )
         self.path_prefix = path_prefix
-        self.lockfile = lockfile.LockFile(os.path.join(self.path_prefix,
-            "etc/.pwd.lock"))
+        self.lockfile = lockfile.LockFile(
+            os.path.join(self.path_prefix, "etc/.pwd.lock")
+        )
         if lock:
             self.lock()
         self.readfile()
         self.password_file.default_values["uid"] = self.getnextuid()
 
     def __str__(self):
-        return "PasswordFile: [{0} {1}]".format(self.password_file,
-            self.shadow_file)
+        return "PasswordFile: [{0} {1}]".format(
+            self.password_file, self.shadow_file
+        )
 
     def getvalue(self, template):
-        """ merge dbs... do passwd file first to get right passwd value"""
+        """merge dbs... do passwd file first to get right passwd value"""
         c = self.password_file.getvalue(template).copy()
         c.update(self.shadow_file.getvalue(template))
         return c
 
     def getvalues(self, template):
-        """ merge dbs... do passwd file first to get right passwd value;
-            note this returns an array with zero or more items"""
+        """merge dbs... do passwd file first to get right passwd value;
+        note this returns an array with zero or more items"""
         a = self.password_file.getvalues(template).copy()
         if a:
             for c in a:
                 if "username" in c:
-                    c.update(self.shadow_file.getvalue({"username" : c["username"]}))
+                    c.update(
+                        self.shadow_file.getvalue({"username": c["username"]})
+                    )
         return a
 
     def updatevalue(self, template):
         copy = template.copy()
         if "password" in copy:
-            copy["password"]=""
+            copy["password"] = ""
         self.password_file.updatevalue(copy)
         self.shadow_file.updatevalue(template)
 
@@ -309,7 +356,7 @@ class PasswordFile(CfgFile):
         # ignore attempts to set passwd for passwd file
         copy = template.copy()
         if "password" in copy:
-            copy["password"]="x"
+            copy["password"] = "x"
         self.password_file.setvalue(copy)
         self.shadow_file.setvalue(template)
 
@@ -319,7 +366,7 @@ class PasswordFile(CfgFile):
 
     def getnextuid(self):
         """returns next free system (<=99) uid"""
-        uids=[]
+        uids = []
         for t in six.itervalues(self.password_file.index):
             if t[1]:
                 uids.append(t[1]["uid"])
@@ -342,10 +389,10 @@ class PasswordFile(CfgFile):
         self.shadow_file.writefile()
 
     def getuser(self, username):
-        return self.getvalue({"username" : username})
+        return self.getvalue({"username": username})
 
     def getusersbyid(self, userid):
-        return self.getvalues({"uid" : userid})
+        return self.getvalues({"uid": userid})
 
     def getdefaultvalues(self):
         a = self.password_file.getdefaultvalues()
@@ -358,25 +405,32 @@ class PasswordFile(CfgFile):
     def unlock(self):
         self.lockfile.unlock()
 
+
 class GroupFile(CfgFile):
-    """ manage the group file"""
+    """manage the group file"""
+
     def __init__(self, image):
         self.__image = image
-        CfgFile.__init__(self, os.path.join(image.get_root(), "etc/group"),
-                         ":",
-                         {"groupname"  : (1, None),
-                          "password"   : (2, ""),
-                          "gid"        : (3, None),
-                          "user-list"  : (4, "")
-                          },
-                         "groupname", comment_match="[+-]")
+        CfgFile.__init__(
+            self,
+            os.path.join(image.get_root(), "etc/group"),
+            ":",
+            {
+                "groupname": (1, None),
+                "password": (2, ""),
+                "gid": (3, None),
+                "user-list": (4, ""),
+            },
+            "groupname",
+            comment_match="[+-]",
+        )
 
         self.readfile()
         self.default_values["gid"] = self.getnextgid()
 
     def getnextgid(self):
         """returns next free system (<=99) gid"""
-        gids=[]
+        gids = []
         for t in six.itervalues(self.index):
             if t[1]:
                 gids.append(t[1]["gid"])
@@ -386,7 +440,7 @@ class GroupFile(CfgFile):
         raise RuntimeError("No free system gids")
 
     def adduser(self, groupname, username):
-        """"add named user to group; does not check if user exists"""
+        """ "add named user to group; does not check if user exists"""
         group = self.getvalue({"groupname": groupname})
         # If the group isn't in the database, we'll add the user to the group,
         # but unless the group is being added in the same transaction, the group
@@ -395,33 +449,36 @@ class GroupFile(CfgFile):
             group = {
                 "groupname": groupname,
                 "gid": self.__image._groupsbyname.get(groupname, ""),
-                "user-list": ""
+                "user-list": "",
             }
-        users = set(group["user-list"].replace(","," ").split())
+        users = set(group["user-list"].replace(",", " ").split())
         users.add(username)
         group["user-list"] = ",".join(users)
         self.setvalue(group)
 
     def subuser(self, groupname, username):
-        """ remove named user from group """
+        """remove named user from group"""
         group = self.getvalue({"groupname": groupname})
         if not group:
             raise RuntimeError("subuser: No such group {0}".format(groupname))
-        users = set(group["user-list"].replace(","," ").split())
+        users = set(group["user-list"].replace(",", " ").split())
         if username not in users:
-            raise RuntimeError("User {0} not in group {1}".format(
-                username, groupname))
+            raise RuntimeError(
+                "User {0} not in group {1}".format(username, groupname)
+            )
         users.remove(username)
         group["user-list"] = ",".join(users)
         self.setvalue(group)
 
     def getgroups(self, username):
-        """ return list of additional groups user belongs to """
-        return sorted([
+        """return list of additional groups user belongs to"""
+        return sorted(
+            [
                 t[1]["groupname"]
                 for t in self.index.values()
                 if t[1] is not None and username in t[1]["user-list"].split(",")
-                ])
+            ]
+        )
 
     def setgroups(self, username, groups):
         current = self.getgroups(username)
@@ -438,36 +495,38 @@ class GroupFile(CfgFile):
             self.subuser(g, username)
 
     def getgroup(self, groupname):
-        return self.getvalue({"groupname" : groupname})
+        return self.getvalue({"groupname": groupname})
 
     def getgroupsbyid(self, groupid):
-        return self.getvalues({"gid" : groupid})
+        return self.getvalues({"gid": groupid})
+
 
 class FtpusersFile(CfgFile):
-    """ If a username is present in this file, it denies that user
+    """If a username is present in this file, it denies that user
     the ability to use ftp"""
 
     def __init__(self, path_prefix):
 
-        CfgFile.__init__(self, os.path.join(path_prefix, "etc/ftpd/ftpusers"),
-                    " ",
-                    {"username"   : (1, None)
-                     },
-                    "username")
+        CfgFile.__init__(
+            self,
+            os.path.join(path_prefix, "etc/ftpd/ftpusers"),
+            " ",
+            {"username": (1, None)},
+            "username",
+        )
         self.readfile()
 
     def getuser(self, username):
-        """ returns true if user is allowed to use FTP - ie is NOT in file"""
-        return not 'username' in self.getvalue({"username" : username})
-
+        """returns true if user is allowed to use FTP - ie is NOT in file"""
+        return not "username" in self.getvalue({"username": username})
 
     def adduser(self, username):
-        """ add specified user to file, removing ability to use ftp"""
-        self.setvalue({"username" : username})
+        """add specified user to file, removing ability to use ftp"""
+        self.setvalue({"username": username})
 
     def subuser(self, username):
-        """ remove specified user from file """
-        self.removevalue({"username" : username})
+        """remove specified user from file"""
+        self.removevalue({"username": username})
 
     def setuser(self, username, value):
         """Add or remove 'username' from the file to turn off or on the user's
@@ -481,32 +540,38 @@ class FtpusersFile(CfgFile):
         elif value and not self.getuser(username):
             self.subuser(username)
 
+
 class UserattrFile(CfgFile):
-    """ manage the userattr file """
+    """manage the userattr file"""
+
     def __init__(self, path_prefix):
-        CfgFile.__init__(self, os.path.join(path_prefix, "etc/user_attr"),
-                         ":",
-                         {"username"    : (1, None),
-                          "qualifier"   : (2, ""),
-                          "reserved1"   : (3, ""),
-                          "reserved2"   : (4, ""),
-                          "attributes"  : (5, "")
-                          },
-                         "username")
+        CfgFile.__init__(
+            self,
+            os.path.join(path_prefix, "etc/user_attr"),
+            ":",
+            {
+                "username": (1, None),
+                "qualifier": (2, ""),
+                "reserved1": (3, ""),
+                "reserved2": (4, ""),
+                "attributes": (5, ""),
+            },
+            "username",
+        )
         self.readfile()
 
     def iscommentline(self, line):
         return len(line) == 0 or self.comment_regexp.match(line)
 
     def splitline(self, line):
-        """ return tokenized line, with attribute column a dictionary
-            w/ lists for values"""
-        cols = re.split(r"(?<=[^\\]):", line) #match non-escaped :
+        """return tokenized line, with attribute column a dictionary
+        w/ lists for values"""
+        cols = re.split(r"(?<=[^\\]):", line)  # match non-escaped :
 
         if len(cols) != len(self.column_names):
             return cols
 
-        attributes=re.split(r"(?<=[^\\]);", cols[4]) # match non escaped ;
+        attributes = re.split(r"(?<=[^\\]);", cols[4])  # match non escaped ;
 
         d = {}
         for attr in attributes:
@@ -516,16 +581,19 @@ class UserattrFile(CfgFile):
         return cols
 
     def valuetostr(self, template):
-        """ print out string; replace attribute dictionary with proper
-        string and use base class to convert entire record to a string """
-        c = template.copy() # since we're mucking w/ this....
+        """print out string; replace attribute dictionary with proper
+        string and use base class to convert entire record to a string"""
+        c = template.copy()  # since we're mucking w/ this....
         attrdict = c["attributes"]
 
-        str = "{0}".format(";".join(
-            [
-                "{0}={1}".format(key, ",".join(attrdict[key]))
-                for key in attrdict
-                ]))
+        str = "{0}".format(
+            ";".join(
+                [
+                    "{0}={1}".format(key, ",".join(attrdict[key]))
+                    for key in attrdict
+                ]
+            )
+        )
         c["attributes"] = str
         return CfgFile.valuetostr(self, c)
 

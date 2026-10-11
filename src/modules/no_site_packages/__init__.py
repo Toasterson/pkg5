@@ -32,11 +32,11 @@ in the system site-packages area."""
 import sys
 
 if sys.platform == "sunos5":
-        from site import getsitepackages, getusersitepackages
+    from site import getsitepackages, getusersitepackages
 
-        pkglist = getsitepackages()
-        pkglist.append(getusersitepackages())
-        sys.path = [ d for d in sys.path if d not in pkglist]
+    pkglist = getsitepackages()
+    pkglist.append(getusersitepackages())
+    sys.path = [d for d in sys.path if d not in pkglist]
 
 # Vim hints
 # vim:ts=8:sw=8:et:fdm=marker

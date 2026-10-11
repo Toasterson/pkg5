@@ -28,6 +28,7 @@ import copy
 import os
 import stat
 import tarfile
+
 # Without the below statements, tarfile will trigger calls to getpwuid
 # and getgrgid for every file extracted.  This in turn leads to nscd
 # usage which slows down the install phase.  Setting these attributes
@@ -37,67 +38,71 @@ import tarfile
 tarfile.pwd = None
 tarfile.grp = None
 
+
 class PkgTarFile(tarfile.TarFile):
-        """PkgTarFile extends the standard TarFile class with methods better
-        suited for the packaging classes, and uses a stricter errorlevel by
-        default.
+    """PkgTarFile extends the standard TarFile class with methods better
+    suited for the packaging classes, and uses a stricter errorlevel by
+    default.
+    """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("errorlevel", 2)
+        tarfile.TarFile.__init__(self, *args, **kwargs)
+
+    def extract_to(self, member, path="", filename=None):
+        """Extract a member from the TarFile archive.
+
+        This method is similar to extract(), but allows the caller to
+        change the final file name. It also creates missing parent
+        directories with a safer mode.
         """
 
-        def __init__(self, *args, **kwargs):
-                kwargs.setdefault("errorlevel", 2)
-                tarfile.TarFile.__init__(self, *args, **kwargs)
+        self._check("r")
 
-        def extract_to(self, member, path="", filename=None):
-                """Extract a member from the TarFile archive.
+        if isinstance(member, tarfile.TarInfo):
+            tarinfo = member
+        else:
+            tarinfo = self.getmember(member)
 
-                This method is similar to extract(), but allows the caller to
-                change the final file name. It also creates missing parent
-                directories with a safer mode.
-                """
+        if filename:
+            # Rename the extracted file if a new filename was given.
+            tarinfo = copy.copy(tarinfo)
+            tarinfo.name = filename
 
-                self._check("r")
+        # Always use the most restrictive standard 'data' filter.
+        filter_function = tarfile.data_filter
+        filtered, _ = self._get_extract_tarinfo(tarinfo, filter_function, path)
+        if filtered is None:
+            return
 
-                if isinstance(member, tarfile.TarInfo):
-                        tarinfo = member
-                else:
-                        tarinfo = self.getmember(member)
+        upperdirs = os.path.dirname(os.path.join(path, filtered.name))
 
-                if filename:
-                        # Rename the extracted file if a new filename was given.
-                        tarinfo = copy.copy(tarinfo)
-                        tarinfo.name = filename
+        if upperdirs and not os.path.exists(upperdirs):
+            # The tarfile we receive contains only files, and none
+            # of the containing directories.  The tarfile code will
+            # create the directories as necessary, but with mode
+            # 777, which is insuffficiently secure.  Thus we create
+            # these directories in advance with tighter permissions;
+            # they'll be fixed up later, when the action execute
+            # methods run.  If proper directory actions
+            # don't exist for these directories, the permissions
+            # will be wrong.
+            try:
+                os.makedirs(upperdirs, stat.S_IRWXU)
+            except EnvironmentError:
+                pass
+        try:
+            self._extract_member(
+                filtered,
+                os.path.join(path, filtered.name),
+                filter_function=filter_function,
+                extraction_root=path,
+            )
+        except (OSError, UnicodeEncodeError) as e:
+            self._handle_fatal_error(e)
+        except tarfile.ExtractError as e:
+            self._handle_nonfatal_error(e)
 
-                # Always use the most restrictive standard 'data' filter.
-                filter_function = tarfile.data_filter
-                filtered, _ = self._get_extract_tarinfo(tarinfo,
-                    filter_function, path)
-                if filtered is None:
-                        return
-
-                upperdirs = os.path.dirname(os.path.join(path, filtered.name))
-
-                if upperdirs and not os.path.exists(upperdirs):
-                        # The tarfile we receive contains only files, and none
-                        # of the containing directories.  The tarfile code will
-                        # create the directories as necessary, but with mode
-                        # 777, which is insuffficiently secure.  Thus we create
-                        # these directories in advance with tighter permissions;
-                        # they'll be fixed up later, when the action execute
-                        # methods run.  If proper directory actions
-                        # don't exist for these directories, the permissions
-                        # will be wrong.
-                        try:
-                                os.makedirs(upperdirs, stat.S_IRWXU)
-                        except EnvironmentError:
-                                pass
-                try:
-                        self._extract_member(filtered, os.path.join(path,
-                            filtered.name), filter_function=filter_function,
-                            extraction_root=path)
-                except (OSError, UnicodeEncodeError) as e:
-                        self._handle_fatal_error(e)
-                except tarfile.ExtractError as e:
-                        self._handle_nonfatal_error(e)
 
 # Vim hints
 # vim:ts=8:sw=8:et:fdm=marker

@@ -23,8 +23,9 @@
 # Copyright (c) 2008, 2016, Oracle and/or its affiliates. All rights reserved.
 
 from . import testutils
+
 if __name__ == "__main__":
-        testutils.setup_environment("../../../proto")
+    testutils.setup_environment("../../../proto")
 import pkg5unittest
 
 import os
@@ -32,27 +33,27 @@ import unittest
 
 
 class TestPkgRebuildIndex(pkg5unittest.SingleDepotTestCase):
-        # Only start/stop the depot once (instead of for every test)
-        persistent_setup = True
+    # Only start/stop the depot once (instead of for every test)
+    persistent_setup = True
 
-        def test_rebuild_index_bad_opts(self):
-                """Test pkg with bad options."""
+    def test_rebuild_index_bad_opts(self):
+        """Test pkg with bad options."""
 
-                self.image_create(self.rurl)
-                self.pkg("rebuild-index -@", exit=2)
-                self.pkg("rebuild-index foo", exit=2)
-                self.pkg("rebuild-index --", exit=2)
+        self.image_create(self.rurl)
+        self.pkg("rebuild-index -@", exit=2)
+        self.pkg("rebuild-index foo", exit=2)
+        self.pkg("rebuild-index --", exit=2)
 
-        def test_rebuild_index_bad_perms(self):
-                """Testing for bug 4570."""
+    def test_rebuild_index_bad_perms(self):
+        """Testing for bug 4570."""
 
-                self.image_create(self.rurl)
-                self.pkg("rebuild-index")
-                self.pkg("rebuild-index", exit=1, su_wrap=True)
+        self.image_create(self.rurl)
+        self.pkg("rebuild-index")
+        self.pkg("rebuild-index", exit=1, su_wrap=True)
 
 
 if __name__ == "__main__":
-        unittest.main()
+    unittest.main()
 
 # Vim hints
 # vim:ts=8:sw=8:et:fdm=marker

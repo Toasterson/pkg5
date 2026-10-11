@@ -29,7 +29,9 @@ from cffi import FFI
 
 ffi = FFI()
 
-ffi.set_source("_pspawn", """
+ffi.set_source(
+    "_pspawn",
+    """
 /* Includes */
 #include <spawn.h>
 #include <sys/types.h>
@@ -40,7 +42,8 @@ typedef struct {
     int start_fd;
     posix_spawn_file_actions_t *fap;
 } walk_data;
-""")
+""",
+)
 
 ffi.cdef("""
 /* Types */

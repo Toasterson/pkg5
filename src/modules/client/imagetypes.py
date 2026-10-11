@@ -32,7 +32,7 @@ img_type_names = {
     IMG_NONE: "none",
     IMG_ENTIRE: "full",
     IMG_PARTIAL: "partial",
-    IMG_USER: "user"
+    IMG_USER: "user",
 }
 
 
