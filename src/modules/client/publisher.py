@@ -1625,7 +1625,7 @@ class Publisher(object):
             if e.errno == errno.ENOENT:
                 return None
             raise
-        return dt.datetime.fromtimestamp(mod_time, dt.UTC)
+        return dt.datetime.fromtimestamp(mod_time, dt.timezone.utc)
 
     def __get_nochild(self):
         try:
@@ -2124,7 +2124,7 @@ pkg unset-publisher {0}
         )
 
         # Mark all operations as occurring at this time.
-        op_time = dt.datetime.now(dt.UTC)
+        op_time = dt.datetime.now(dt.timezone.utc)
 
         for origin, opath in opaths:
             src_cat = pkg.catalog.Catalog(meta_root=opath, read_only=True)
@@ -2617,7 +2617,7 @@ pkg unset-publisher {0}
 
         if any_refreshed:
             # Update refresh time.
-            self.last_refreshed = dt.datetime.now(dt.UTC)
+            self.last_refreshed = dt.datetime.now(dt.timezone.utc)
 
         # Finally, build a new catalog for this publisher based on a
         # composite of the catalogs from all origins.
@@ -2744,7 +2744,7 @@ pkg unset-publisher {0}
         """Replaces the current client_uuid with a new UUID."""
 
         self.__client_uuid = str(uuid.uuid1())
-        self.__client_uuid_time = dt.datetime.now(dt.UTC).ctime()
+        self.__client_uuid_time = dt.datetime.now(dt.timezone.utc).ctime()
 
     def validate_config(self, repo_uri=None):
         """Verify that the publisher's configuration (such as prefix)

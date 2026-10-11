@@ -90,13 +90,13 @@ default_policy_map = {
 }
 
 CA_PATH = "ca-path"
-# Default CA_PATH is /etc/ssl/certs
+# Default CA_PATH is /etc/openssl/certs
 default_properties = {
-    CA_PATH: os.path.join(os.path.sep, "etc", "ssl", "certs"),
+    CA_PATH: os.path.join(os.path.sep, "etc", "openssl", "certs"),
     # Path default is intentionally relative for this case.
-    "trust-anchor-directory": os.path.join("etc", "ssl", "pkg"),
+    "trust-anchor-directory": os.path.join("etc", "certs", "CA"),
     DEFAULT_CONCURRENCY: 1,
-    AUTO_BE_NAME: "omnios-r%r",
+    AUTO_BE_NAME: "time:openindiana-%Y:%m:%d",
 }
 
 # Assume the repository metadata should be checked no more than once every
@@ -1259,9 +1259,9 @@ class BlendedConfig(object):
 
         self.__proxy_url = None
 
-        syscfg_path = os.path.join(imgdir, "pkg5.syspub")
+        syscfg_path = self.__syscfg_path = os.path.join(imgdir, "pkg5.syspub")
         # load the existing system repo config
-        if os.path.exists(syscfg_path):
+        if use_system_pub and os.path.exists(syscfg_path):
             old_sysconfig = ImageConfig(syscfg_path, None)
         else:
             old_sysconfig = NullSystemPublisher()
@@ -1737,15 +1737,27 @@ class BlendedConfig(object):
         """
 
         self.img_cfg.reset(overrides)
-        self.sys_cfg.reset()
-        old_sysconfig = ImageConfig(os.path.join(imgdir, "pkg5.syspub"), None)
+        syscfg_path = self.__syscfg_path
+        if self.img_cfg.get_policy("use-system-repo") and os.path.exists(
+            syscfg_path
+        ):
+            if not isinstance(self.sys_cfg, NullSystemPublisher):
+                self.sys_cfg.reset()
+            old_sysconfig = ImageConfig(syscfg_path, None)
+        else:
+            self.sys_cfg = NullSystemPublisher()
+            old_sysconfig = NullSystemPublisher()
         (
             self.__publishers,
             self.added_pubs,
             self.removed_pubs,
             self.modified_pubs,
         ) = self.__merge_publishers(
-            self.img_cfg, self.sys_cfg, self.__pkg_counts, old_sysconfig
+            self.img_cfg,
+            self.sys_cfg,
+            self.__pkg_counts,
+            old_sysconfig,
+            self.__proxy_url,
         )
 
     def __get_publisher(self, prefix):

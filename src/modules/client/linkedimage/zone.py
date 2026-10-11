@@ -493,6 +493,7 @@ def _list_zones(root, path_transform):
         # XXX: don't hard code brand names, use a brand attribute
         # pylint: enable=W0511
         if z_brand not in [
+            "ipkg",
             "lipkg",
             "solaris",
             "sn1",

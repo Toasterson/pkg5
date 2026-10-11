@@ -952,7 +952,9 @@ class _RepoStore(object):
                 if e.errno == errno.ENOENT:
                     return None
                 raise
-            return datetime.datetime.fromtimestamp(mod_time, datetime.UTC)
+            return datetime.datetime.fromtimestamp(
+                mod_time, datetime.timezone.utc
+            )
 
         # To determine if a transformation is needed, first check for a
         # v0 catalog attrs file.
@@ -4544,9 +4546,8 @@ class RepositoryConfig(object):
                 "repository",
                 [
                     cfg.PropInt("version"),
-                    # NOTE: OmniOS uses a different trust anchor directory.
                     cfg.Property(
-                        "trust-anchor-directory", default="/etc/ssl/pkg/"
+                        "trust-anchor-directory", default="/etc/certs/CA/"
                     ),
                     cfg.PropList("signature-required-names"),
                     cfg.PropBool("check-certificate-revocation", default=False),

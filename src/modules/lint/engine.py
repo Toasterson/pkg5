@@ -73,7 +73,7 @@ class LintEngineCache:
         # release is a build number, eg. 150
         # version_pattern used by the engine is a regexp, intended
         # to be used when searching for images, combined with the
-        # release - eg. "*,5.11-151"
+        # release - eg. "*,5.11-0."
         #
         self.version_pattern = version_pattern
         self.release = release
@@ -272,8 +272,8 @@ class LintEngine(object):
 
     'version.pattern' A version pattern, used when specifying a build number
     to lint against (-b). If not specified in the rcfile, this pattern is
-    "*,5.11-151", matching all components of the '5.11' build, with a branch
-    prefix of '151'
+    "*,5.11-0.", matching all components of the '5.11' build, with a branch
+    prefix of '0.'
 
     'info_classification_path' A path the file used to check the values
     of info.classification attributes in manifests.
@@ -309,7 +309,7 @@ class LintEngine(object):
         self.pattern = None
         self.release = None
         # a prefix for the pattern used to search for given releases
-        self.version_pattern = "*,5.11-151"
+        self.version_pattern = "*,5.11-0."
 
         # lists of checker functions and excluded checker functions
         self.checkers = []
