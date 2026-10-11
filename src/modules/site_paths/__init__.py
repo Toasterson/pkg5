@@ -24,14 +24,14 @@
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 #
 
-"""Adjust sys.path so that /usr/lib/pkg is first and that neither the system
-site-packages nor any user site-packages directory is present.
-This provides a stable and consistent execution environment and allows
-bundling some modules with pkg.
+"""Exclude system and user site-packages on Solaris during command startup.
+
+OpenIndiana uses the interpreter's vendor-packages directory for pkg and its
+system dependencies. Other platforms retain their normal module search paths.
 """
 
-from site import getsitepackages, getusersitepackages, addsitedir
-import os, sys
+from site import getsitepackages, getusersitepackages
+import sys
 
 
 def strip_zip():
@@ -44,29 +44,9 @@ def strip_site():
     sys.path = [d for d in sys.path if d not in strip]
 
 
-def add_pkglib():
-    # If PYTHONPATH is set in the environment and the environment is not
-    # being ignored, then don't adjust the path. This could, for example,
-    # be running under the testsuite.
-    if "PYTHONPATH" in os.environ and not getattr(
-        sys.flags, "ignore_environment"
-    ):
-        return
-    import platform
-
-    strip_zip()
-    sys.path, remainder = sys.path[:2], sys.path[2:]
-    addsitedir(
-        "/usr/lib/pkg/python{}".format(
-            ".".join(platform.python_version_tuple()[:2])
-        )
-    )
-    sys.path.extend(remainder)
-
-
 def init():
-    strip_site()
-    add_pkglib()
+    if sys.platform == "sunos5":
+        strip_site()
 
 
 # Vim hints

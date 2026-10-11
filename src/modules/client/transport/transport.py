@@ -755,7 +755,7 @@ class Transport(object):
         if self.__cadir is None:
             # If transport isn't connected to image, or no
             # ca-dir is specified, fallback to this one.
-            fb_cadir = os.path.join(os.path.sep, "etc", "ssl", "certs")
+            fb_cadir = os.path.join(os.path.sep, "etc", "openssl", "certs")
 
             try:
                 cadir = self.cfg.get_property("ca-path")
@@ -2212,8 +2212,8 @@ class Transport(object):
             except EnvironmentError:
                 pass
             else:
-                nu = crl.next_update.replace(tzinfo=dt.UTC)
-                cur_time = dt.datetime.now(dt.UTC)
+                nu = crl.next_update.replace(tzinfo=dt.timezone.utc)
+                cur_time = dt.datetime.now(dt.timezone.utc)
 
                 if cur_time < nu:
                     self.__tmp_crls[uri] = crl

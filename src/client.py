@@ -76,15 +76,13 @@ def altbe():
         return
 
     exe = sysconfig.get_config_var("EXENAME")
-    pyver = sysconfig.get_config_var("py_version_short")
     libdir = sysconfig.get_config_var("LIBDIR")
     destlib = sysconfig.get_config_var("DESTLIB")
-    pkglib = f"/usr/lib/pkg/python{pyver}"
+    pkglib = f"{destlib}/vendor-packages"
 
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = f"{be}{libdir}"
     env["PYTHONPATH"] = f"{be}{pkglib}"
-    env["PYTHONPATH"] += f":{be}{destlib}/vendor-packages"
 
     try:
         os.execvpe(
@@ -261,16 +259,12 @@ def cleanup():
 
 
 def notes_block(release_url=None):
-    url = "https://omnios.org/"
     if release_url is None:
         release_url = misc.get_release_notes_url()
-    msg("\n" + "-" * 79)
-    msg("{:42} {}".format("Find release notes:", release_url))
-    msg("-" * 79)
-    msg("{:42} {}{}".format("Get a support contract:", url, "support"))
-    msg("{:42} {}{}".format("Sponsor OmniOS development:", url, "patron"))
-    msg("{:42} {}{}".format("Contribute to OmniOS:", url, "joinus"))
-    msg("-" * 79 + "\n")
+    msg("\n" + "-" * 75)
+    msg(_("NOTE: Please review release notes posted at:\n"))
+    msg(release_url)
+    msg("-" * 75 + "\n")
 
 
 def format_update_block():

@@ -1713,10 +1713,7 @@ def prune_debug_attrs(action):
 # dependency target, either intrinsically (like a man page or image file), or
 # because we don't implement a dependency parser for it (e.g. perl).
 
-skip_prefix = (
-    "usr/share/man",
-    "opt/ooce/share/man",
-)
+skip_prefix = ("usr/share/man",)
 
 skip_suffix = (
     ".json",

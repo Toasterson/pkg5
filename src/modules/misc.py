@@ -138,7 +138,7 @@ def get_release_notes_url():
 
     # TBD: replace with a call to api.info() that can return a "release"
     # attribute of form YYYYMM against the SUNWsolnm package
-    return "https://omnios.org/releasenotes"
+    return "https://www.openindiana.org/"
 
 
 def time_to_timestamp(t):
@@ -572,6 +572,11 @@ def setlocale(category, loc=None, printer=None):
             "not installed.  Reverting to C locale.".format(dl)
         )
         locale.setlocale(category, "C")
+
+    # Correct preferred encoding so files are not decoded with the ASCII codec.
+    if locale.getpreferredencoding(False) != "UTF-8":
+        locale.setlocale(locale.LC_CTYPE, "en_US.UTF-8")
+        locale.setlocale(locale.LC_COLLATE, "en_US.UTF-8")
 
 
 def N_(message):
@@ -3251,7 +3256,10 @@ def set_fd_limits(printer=None):
 
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-        soft = max(hard, FILE_DESCRIPTOR_LIMIT)
+        if hard == resource.RLIM_INFINITY:
+            soft = resource.RLIM_INFINITY
+        else:
+            soft = max(hard, FILE_DESCRIPTOR_LIMIT)
         resource.setrlimit(resource.RLIMIT_NOFILE, (soft, hard))
     except (OSError, ValueError) as e:
         printer(

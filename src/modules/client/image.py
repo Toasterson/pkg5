@@ -2930,9 +2930,8 @@ in the environment or by setting simulate_cmdpath in DebugValues.""")
         # image state database write-through.
         db_changed = set(combo)
 
-        # If PKG_AUTOINSTALL is set in the environment, don't mark
-        # the installed packages as 'manually installed'. This is
-        # used by Kayak when creating the initial ZFS send stream.
+        # Installers and zone creation export PKG_AUTOINSTALL so that
+        # seeded packages are not marked as manually installed.
         if "PKG_AUTOINSTALL" in os.environ:
             manual = set()
 
@@ -3420,7 +3419,7 @@ in the environment or by setting simulate_cmdpath in DebugValues.""")
         )
 
         # Mark all operations as occurring at this time.
-        op_time = datetime.datetime.now(datetime.UTC)
+        op_time = datetime.datetime.now(datetime.timezone.utc)
 
         # The image catalogs need to be updated, but this is a bit
         # tricky as previously known packages must remain known even

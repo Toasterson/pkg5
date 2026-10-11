@@ -223,7 +223,7 @@ class CatalogPartBase(object):
             # Operations shouldn't attempt to load the part data
             # unless meta_root is defined and the data exists.
             self.loaded = True
-            self.last_modified = datetime.datetime.now(datetime.UTC)
+            self.last_modified = datetime.datetime.now(datetime.timezone.utc)
         else:
             self.last_modified = self.__last_modified()
 
@@ -250,7 +250,7 @@ class CatalogPartBase(object):
             if e.errno == errno.ENOENT:
                 return None
             raise
-        return datetime.datetime.fromtimestamp(mod_time, datetime.UTC)
+        return datetime.datetime.fromtimestamp(mod_time, datetime.timezone.utc)
 
     def __set_meta_root(self, path):
         if path:
@@ -491,7 +491,7 @@ class CatalogPart(CatalogPartBase):
             self.sort(pfmris=set([pfmri]))
 
         if not op_time:
-            op_time = datetime.datetime.now(datetime.UTC)
+            op_time = datetime.datetime.now(datetime.timezone.utc)
         self.last_modified = op_time
         self.signatures = {}
         return entry
@@ -814,7 +814,7 @@ class CatalogPart(CatalogPartBase):
             raise api_errors.UnknownCatalogEntry(pfmri.get_fmri())
 
         if not op_time:
-            op_time = datetime.datetime.now(datetime.UTC)
+            op_time = datetime.datetime.now(datetime.timezone.utc)
         self.last_modified = op_time
         self.signatures = {}
 
@@ -1493,7 +1493,7 @@ class Catalog(object):
         # that the last modification times will be synchronized.  This
         # also has the benefit of avoiding extra datetime object
         # instantiations.
-        op_time = datetime.datetime.now(datetime.UTC)
+        op_time = datetime.datetime.now(datetime.timezone.utc)
 
         # For each entry in the 'src' catalog, add its BASE entry to the
         # current catalog along and then add it to the 'd'iscard dict if
@@ -2222,7 +2222,7 @@ class Catalog(object):
             # operations so that the last modification times
             # of all catalog parts and update logs will be
             # synchronized.
-            op_time = datetime.datetime.now(datetime.UTC)
+            op_time = datetime.datetime.now(datetime.timezone.utc)
 
             # Always add packages to the base catalog.
             entry = {}
@@ -3757,7 +3757,7 @@ class Catalog(object):
             # operations so that the last modification times
             # of all catalog parts and update logs will be
             # synchronized.
-            op_time = datetime.datetime.now(datetime.UTC)
+            op_time = datetime.datetime.now(datetime.timezone.utc)
 
             for name in self._attrs.parts:
                 part = self.get_part(name)
@@ -3957,7 +3957,7 @@ class Catalog(object):
             return
         entry["metadata"] = metadata
 
-        op_time = datetime.datetime.now(datetime.UTC)
+        op_time = datetime.datetime.now(datetime.timezone.utc)
         attrs = self._attrs
         attrs.last_modified = op_time
         attrs.parts[base.name] = {"last-modified": op_time}
@@ -4080,13 +4080,13 @@ def datetime_to_update_ts(dt):
 def now_to_basic_ts():
     """Returns the current UTC time as timestamp in ISO-8601 basic
     format."""
-    return datetime_to_basic_ts(datetime.datetime.now(datetime.UTC))
+    return datetime_to_basic_ts(datetime.datetime.now(datetime.timezone.utc))
 
 
 def now_to_update_ts():
     """Returns the current UTC time as timestamp in ISO-8601 basic
     partial format."""
-    return datetime_to_update_ts(datetime.datetime.now(datetime.UTC))
+    return datetime_to_update_ts(datetime.datetime.now(datetime.timezone.utc))
 
 
 def ts_to_datetime(ts):
@@ -4105,7 +4105,7 @@ def ts_to_datetime(ts):
     except ValueError:
         usec = 0
     return datetime.datetime(
-        year, month, day, hour, minutes, sec, usec, datetime.UTC
+        year, month, day, hour, minutes, sec, usec, datetime.timezone.utc
     )
 
 
@@ -4125,7 +4125,7 @@ def basic_ts_to_datetime(ts):
     except ValueError:
         usec = 0
     return datetime.datetime(
-        year, month, day, hour, minutes, sec, usec, datetime.UTC
+        year, month, day, hour, minutes, sec, usec, datetime.timezone.utc
     )
 
 
