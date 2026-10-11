@@ -322,23 +322,6 @@ def find_tests(
             # We tack this in for pretty-printing.
             classobj._Pkg5TestCase__suite_name = suitename
 
-            # Skip some test classes. OmniOS does not currently
-            # have Apache-backed repos or depots
-            if cname in [
-                "TestSysrepo",
-                "TestHTTPS",
-                "TestBasicSysrepoCli",
-                "TestDetailedSysrepoCli",
-                "TestHttpDepot",
-                "TestHttpsDepot",
-                "TestPkgInstallApache",
-                "TestPkgrecvHTTPS",
-                "TestPkgrepoHTTPS",
-                "TestPkgsendHTTPS",
-                "TestP5pWsgi",
-            ]:
-                continue
-
             for attrname in dir(classobj):
                 methobj = getattr(classobj, attrname)
                 # Make sure its a test method
