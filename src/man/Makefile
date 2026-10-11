@@ -17,6 +17,12 @@ ROOTUSRSHAREMAN = $(ROOTUSRSHARE)/man
 MAN1DIR = $(ROOTUSRSHAREMAN)/man1
 MAN7DIR = $(ROOTUSRSHAREMAN)/man7
 MAN8DIR = $(ROOTUSRSHAREMAN)/man8
+JA_MAN1DIR = $(ROOTUSRSHAREMAN)/ja_JP.UTF-8/man1
+JA_MAN7DIR = $(ROOTUSRSHAREMAN)/ja_JP.UTF-8/man7
+JA_MAN8DIR = $(ROOTUSRSHAREMAN)/ja_JP.UTF-8/man8
+ZH_MAN1DIR = $(ROOTUSRSHAREMAN)/zh_CN.UTF-8/man1
+ZH_MAN7DIR = $(ROOTUSRSHAREMAN)/zh_CN.UTF-8/man7
+ZH_MAN8DIR = $(ROOTUSRSHAREMAN)/zh_CN.UTF-8/man8
 
 MAN1 = \
 	pkg.1 \
@@ -34,26 +40,45 @@ MAN1 = \
 
 MAN7 = \
 	bhyve.7 \
-	emu.7 \
-	illumos.7 \
 	ipkg.7 \
 	kvm.7 \
-	lipkg.7 \
-	lx.7 \
-	pkg.7 \
-	pkgsrc.7 \
-	sparse.7
+	pkg.7
 
-MAN8 = \
-	pkg.depotd.8
+MAN8 = pkg.depotd.8 pkg.depot-config.8 pkg.sysrepo.8
+
+# These translations predate the English mdoc conversion.
+L10N_MAN1 = \
+	pkg.1 \
+	pkgdepend.1 \
+	pkgdiff.1 \
+	pkgfmt.1 \
+	pkglint.1 \
+	pkgmerge.1 \
+	pkgmogrify.1 \
+	pkgrecv.1 \
+	pkgrepo.1 \
+	pkgsend.1 \
+	pkgsign.1
+L10N_MAN7 = pkg.7
+L10N_MAN8 = pkg.depotd.8 pkg.sysrepo.8
+
+MANDIRS = $(MAN1DIR) $(MAN7DIR) $(MAN8DIR) \
+	$(JA_MAN1DIR) $(JA_MAN7DIR) $(JA_MAN8DIR) \
+	$(ZH_MAN1DIR) $(ZH_MAN7DIR) $(ZH_MAN8DIR)
 
 all:
 
 install: \
-	$(MAN1DIR) $(MAN7DIR) $(MAN8DIR) \
+	$(MANDIRS) \
 	$(MAN1:%=$(MAN1DIR)/%) \
 	$(MAN7:%=$(MAN7DIR)/%) \
-	$(MAN8:%=$(MAN8DIR)/%)
+	$(MAN8:%=$(MAN8DIR)/%) \
+	$(L10N_MAN1:%=$(JA_MAN1DIR)/%) \
+	$(L10N_MAN7:%=$(JA_MAN7DIR)/%) \
+	$(L10N_MAN8:%=$(JA_MAN8DIR)/%) \
+	$(L10N_MAN1:%=$(ZH_MAN1DIR)/%) \
+	$(L10N_MAN7:%=$(ZH_MAN7DIR)/%) \
+	$(L10N_MAN8:%=$(ZH_MAN8DIR)/%)
 
 check:
 	-mandoc -T lint $(MAN1) $(MAN7) $(MAN8) 2>&1 | \
@@ -61,8 +86,14 @@ check:
 
 clean clobber:
 
-$(MAN1DIR) $(MAN7DIR) $(MAN8DIR):
+$(MANDIRS):
 	$(MKDIR) $@
 
 $(MAN1DIR)/% $(MAN7DIR)/% $(MAN8DIR)/%: %
+	$(RM) $@; $(INSTALL) -f $(@D) -m 0444 $<
+
+$(JA_MAN1DIR)/% $(JA_MAN7DIR)/% $(JA_MAN8DIR)/%: ja_JP/%
+	$(RM) $@; $(INSTALL) -f $(@D) -m 0444 $<
+
+$(ZH_MAN1DIR)/% $(ZH_MAN7DIR)/% $(ZH_MAN8DIR)/%: zh_CN/%
 	$(RM) $@; $(INSTALL) -f $(@D) -m 0444 $<

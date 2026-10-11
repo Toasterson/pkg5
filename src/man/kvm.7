@@ -53,20 +53,12 @@ command, for example:
 .Pp
 .Dl zfs create -V 30G rpool/bootdisk2
 .\" cdrom
-.It Sy cdrom Ns Oo Ar N Oc Ar path
+.It Sy cdrom Ar path
 .Pp
-Specifies the path to one or more CD/DVD image
+Specifies one CD/DVD image
 .Pq Pa .iso
-files that will be inserted into virtual CD/DVD drive(s) in the guest.
-To specify multiple image files, create multiple attributes with different
-values of
-.Ar N ,
-starting with 0.
-If only a single CD image is required,
-.Ar N
-can be omitted.
-.Pp
-Each image file must also be mapped into the zone using an
+inserted into an IDE CD/DVD drive in the guest.
+The image file must also be mapped into the zone using an
 .Sy fs
 block, as shown in the example below.
 .\" console
@@ -139,34 +131,22 @@ If no suffix is given, the value is assumed to be in mebibytes.
 The default value, if this attribute is not specified, is
 .Sy 1G .
 .\" extra
-.It Ic extra Ns Op Ar N
+.It Ic extra Ar options
 .Pp
-Any extra
-.Ar options
-to be passed directly to the
-.Nm
-hypervisor.
-To add multiple options, create multiple attriutes with different values of
-.Ar N .
-If only a single extra option is required,
-.Ar N
-can be omitted.
-.\" type
-.It Sy type Ar type
-.Pp
-Specifies the type of the virtual machine.
-This needs to be set for some guest operating systems so that things are
-set up as they expect.
-For most guests, this can be left unset.
-Supported values are:
-.Bl -bullet
-.It
-.Sy generic Pq default
-.It
-.Sy openbsd
-.It
-.Sy windows
-.El
+Additional options to pass directly to QEMU, separated by spaces.
+.It Ic cpu Ar model
+The QEMU CPU model to present to the guest.
+The default is
+.Sy qemu64 .
+.It Ic bootorder Ar order
+The QEMU boot order.
+The default is
+.Sy cd
+.Pq disk, then CD-ROM .
+.It Ic rtc Ar options
+The QEMU real-time clock options.
+The default is
+.Sy base=utc,driftfix=slew .
 .It Sy vcpus Ar number
 .Pp
 Specify the number of guest virtual CPUs.

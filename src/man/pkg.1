@@ -610,7 +610,7 @@ installs the packages into an image.
 .Pp
 Packages can only be installed into file systems that are part of a
 boot environment (BE).
-For example, on a default OmniOS installation, only datasets under
+For example, on a default OpenIndiana installation, only datasets under
 .Pa rpool/ROOT/ Ns Ar BEname Ns /
 are supported for package operations.
 .Pp
@@ -1007,6 +1007,8 @@ If the actuators do not finish within the given
 in seconds,
 .Nm
 will continue operation and exit with return code 8.
+On OpenIndiana, the timeout is ignored and this option is equivalent to
+.Fl \-sync-actuators .
 .El
 .Ed
 .\" exact-install
@@ -1385,8 +1387,8 @@ The usual output is in three columns:
 .Ed
 .Bd -literal -offset indent-two
 NAME (PUBLISHER)                    VERSION           IFO
-entire                              11-151037.0       i--
-ooce/developer/cmake (extra.omnios) 3.19.5-151037.0   im-
+entire                              0.5.11-2021.0.0.0 i--
+developer/build/cmake (example.com) 3.19.5-2021.0.0.0 im-
 .Ed
 .Bd -ragged -offset Ds
 The first column contains the name of the package.
@@ -1767,16 +1769,16 @@ For example, for a file action, this is
 All attributes of matching actions.
 .It Sy pkg.fmri
 The full FMRI of the package containing the action, such as
-.Sy pkg://omnios/entire@11-151036.0:20201029T154929Z .
+.Sy pkg://openindiana.org/entire@0.5.11-2020.0.0.0:20201029T154929Z .
 .It Sy pkg.name
 The name of the package containing the action, such as
 .Sy entire .
 .It Sy pkg.publisher
 The publisher of the package containing the action, such as
-.Sy omnios .
+.Sy openindiana.org .
 .It Sy pkg.shortfmri
 The short form FMRI of the package containing the action, such as
-.Sy pkg://omnios/entire@11-151036.0 .
+.Sy pkg://openindiana.org/entire@0.5.11-2020.0.0.0 .
 .El
 .Pp
 The
@@ -2057,8 +2059,8 @@ as shown in the following partial output:
 .Bd -literal -offset xxxx
 $ pkg search \e<pkg\e>
 PACKAGE                             PUBLISHER
-pkg:/package/pkg@0.5.11-151036.0    omnios
-pkg:/package/svr4@0.5.11-151036.0   omnios
+pkg:/package/pkg@0.5.11-151036.0    openindiana.org
+pkg:/package/svr4@0.5.11-151036.0   openindiana.org
 .Ed
 .Pp
 With the
@@ -3527,8 +3529,6 @@ Without this property being set, and assuming that the
 .Fl \-be-name
 option is not provided, the new BE will be named after the current, with an
 incrementing numerical suffix.
-If an update requires a new boot environment but is not associated with an
-OmniOS release then the template will not be used.
 The
 .Fl \-be-name
 option always overrides this property.
@@ -3553,7 +3553,7 @@ The current date and time in the format specified.
 is a
 .Xr strftime 3C - Ns
 compatible string such as
-.Sy omnios-%Y.%m.%d .
+.Sy openindiana-%Y:%m:%d .
 It is not advised to use hyphens for separating components as the trailing
 component may be confused with a boot environment revision number.
 .El
@@ -3561,7 +3561,22 @@ component may be confused with a boot environment revision number.
 The default value for the
 .Cm auto-be-name
 property is
-.Dq Sy omnios-r%r .
+.Dq Sy time:openindiana-%Y:%m:%d .
+.Pp
+For templates without the time: prefix, the
+.Sy %r ,
+.Sy %d ,
+and
+.Sy \&%D
+tokens depend on the
+.Sy ooce.release
+and
+.Sy ooce.release.build
+attributes of the
+.Sy release/name
+package.
+These attributes are not populated on OpenIndiana; use a time-based template
+instead.
 .It Cm be-policy
 .Pq string
 Specify when a boot environment is created during packaging operations.
@@ -3610,7 +3625,7 @@ portions of
 for requirements for the CA directory.
 .Pp
 Default value:
-.Pa /etc/ssl/certs
+.Pa /etc/openssl/certs
 .It Cm check-certificate-revocation
 .Sq boolean
 If this is set to
@@ -3815,6 +3830,9 @@ validating the signatures of a package.
 .Pq string
 The path name of the directory that contains the trust anchors for the image.
 This path is relative to the image.
+.Pp
+Default value:
+.Pa etc/certs/CA
 .It Cm use-system-repo
 .Pq boolean
 This property indicates whether the image should use the system repository as a
@@ -4302,31 +4320,16 @@ server into a new boot environment called
 .Sy testbe .
 .Bd -literal
      $ pkg apply-hot-fix --be-name=testbe \e
-         https://downloads.omnios.org/pkg/bloody/hotfix-1234.p5p
+         https://dlc.openindiana.org/pkg/hotfix-1234.p5p
 .Ed
 .\"
 .It Sy Example 36 No Set up a template for automatic boot environment naming
 .Pp
-The following will result in boot environments which include the
-release name and date, for example
-.Sy omnios_r151026k_20180716 .
+The following uses the current date and time to name new boot environments,
+for example
+.Sy openindiana_2026:10:11-14:30 .
 .Bd -literal
-    $ pkg set-property auto-be-name omnios_r%r_%D
-.Ed
-.Pp
-To use the current date and time, use the time: prefix and a format string:
-.Bd -literal
-    $ pkg set-property auto-be-name time:omnios_%Y%m%d
-.Ed
-.Pp
-For bloody releases, the release name does not change and so the
-.Sy %r
-token is not available.
-The
-.Sy \&%D
-token can be used to include the release date in the BE name:
-.Bd -literal
-    $ pkg set-property auto-be-name bloody_%D
+    $ pkg set-property auto-be-name time:openindiana_%Y:%m:%d-%H:%M
 .Ed
 .\"
 .It Sy Example 37 No Verify an Individual Path in an Image
@@ -4476,3 +4479,5 @@ and may change at any time.
 .Xr pkg.depotd 8 ,
 .Xr pkg.sysrepo 8 ,
 .Xr zoneadm 8
+.Pp
+.Lk https://github.com/OpenIndiana/pkg5/

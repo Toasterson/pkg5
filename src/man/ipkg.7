@@ -15,62 +15,53 @@
 .Os
 .Sh NAME
 .Nm ipkg
-.Nd zone brand for running a full copy of OmniOS
+.Nd zone brand for running a full copy of OpenIndiana
 .Sh DESCRIPTION
 The
 .Em ipkg
-brand
-uses the
+brand uses the
 .Xr brands 7
-framework to provide an environment for running a full copy of Omnios, with
-independently managed software.
-For routine patching, ipkg zones must be upgraded separately but core packages
-such as the system libraries should be kept close to the version installed in
-the global zone.
-.Pp
-If a package update in the global zone requires the creation of a new boot
-environment (BE), then each ipkg zone will also get a new BE that will be
-switched to when the global zone is restarted into its new BE.
-.Pp
-When performing major version upgrades, ipkg zones must be detached first and
-then re-attached later; re-attach will trigger a full software update to bring
-the zone back into sync with the global zone.
-.Pp
+framework to provide an environment for running a full copy of OpenIndiana,
+with system software packages linked to those installed in the global zone.
+By default, a package update in the global zone also updates core system
+packages in linked
 .Em ipkg
-zones are useful for some situations, but have generally been superseded by
-.Xr lipkg 7
-zones which automatically keep core system packages synchronised with the
+zones to keep them synchronised with the global zone.
+Other packages can differ between the global zone and an
+.Em ipkg
+zone, subject to package dependencies.
+.Pp
+The
+.Em nlipkg
+brand uses the same environment without linking its package image to the
 global zone.
+Software in an
+.Em nlipkg
+zone is managed and updated independently.
+Administrators must keep its core packages compatible with the global zone.
 .Sh CONFIGURATION
-Persistent network configuration (including DNS resolver information) can be
-configured using
-.Xr zonecfg 8 .
+Use
+.Xr zonecfg 8
+to configure the zone and its network interfaces.
+Configure persistent IP addresses and DNS resolver information inside the zone.
 An example
 .Em ipkg
-zone configured with VNIC "vnic0" using a static IP address is below:
-.sp
+zone using an existing VNIC called
+.Sy vnic0
+is shown below:
 .Bd -literal -offset indent
 create -t ipkg
 set zonepath=/zones/testzone
 set autoboot=true
+set ip-type=exclusive
 add net
     set physical=vnic0
-    set allowed-address=192.168.0.2/24
-    set defrouter=192.168.0.1
-    set global-nic=auto
-end
-add attr
-    set name=dns-domain
-    set type=string
-    set value=example.com
-end
-add attr
-    set name=resolvers
-    set type=string
-    set value=192.168.12.1,192.168.13.1
 end
 .Ed
-.sp
+.Pp
+To create an independently managed zone, use
+.Sy create -t nlipkg
+instead.
 .Sh LIMITATIONS
 .Em ipkg
 zone boot environments are linked to the global zone boot environment under
@@ -81,7 +72,6 @@ For this reason, zone data which should be shared across boot environments
 should be allocated to a dedicated dataset.
 .Sh SEE ALSO
 .Xr brands 7 ,
-.Xr lipkg 7 ,
 .Xr privileges 7 ,
 .Xr resource_controls 7 ,
 .Xr zones 7 ,

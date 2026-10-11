@@ -53,8 +53,5 @@ operating system software is not delivered for other platforms using pkg(7).
 Development best practices for writing multi-platform pkg(7) code are available
 here: http://opensolaris.org/os/project/pkg/devinfo/bestpractices/.
 
-Build instructions for non-OpenSolaris platforms are here:
-http://wiki.updatecenter.java.net/Wiki.jsp?page=IPSHOWTO
-
 Information about using multi-platform pkg(7) and pre-built binaries
 are available here: http://wikis.sun.com/display/IpsBestPractices
