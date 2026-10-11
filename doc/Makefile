@@ -93,6 +93,11 @@ HTML_CSS = $(HTML_DIR)/$(CSS)
 HTML_FRAGMENTS = $(RST_FRAGMENTS:%.rst=$(HTML_DIR)/%.html)
 HTML_JOINS = $(RST_JOINS:%.rst=$(HTML_DIR)/%.html)
 
+# Render mdoc pages before including them as literal text in the guide.
+MAN_DIR = man-out
+MAN_PAGES = pkg.1 pkgrecv.1 pkgsend.1 pkg.depotd.8 pkg.7
+MAN_TEXT = $(MAN_PAGES:%=$(MAN_DIR)/%.txt)
+
 .KEEP_STATE:
 
 pdf: guide-main.pdf
@@ -101,7 +106,15 @@ draft: pdf
 
 html: $(HTML_DIR) .WAIT $(HTML_CSS) $(HTML_FRAGMENTS) $(HTML_JOINS)
 
-$(HTML_JOINS): $(HTML_FRAGMENTS)
+$(HTML_JOINS): $(HTML_FRAGMENTS) $(MAN_TEXT)
+
+guide-main.pdf: $(MAN_TEXT)
+
+$(MAN_DIR):
+	mkdir -p $@
+
+$(MAN_DIR)/%.txt: ../src/man/% $(MAN_DIR)
+	mandoc -T ascii $< | col -b > $@
 
 html-out:
 	-mkdir $@
@@ -121,5 +134,6 @@ $(HTML_DIR)/$(CSS): $(CSS)
 
 clean:
 	rm -f $(HTML_FRAGMENTS) $(RSI_INCLUDES)
+	rm -rf $(MAN_DIR)
 
 clobber: clean

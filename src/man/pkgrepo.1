@@ -621,7 +621,7 @@ These values should be the same as the corresponding
 The absolute path name of the directory that contains the trust anchors for
 packages in this repository.
 If not specified,
-.Pq /etc/ssl/pkg/
+.Pq /etc/certs/CA/
 is used.
 This property is only used by the verify and fix subcommands to validate the
 contents of the repository.
@@ -798,9 +798,9 @@ Display a summary of publishers and the number of packages in a repository.
     PUBLISHER   PACKAGES STATUS UPDATED
     example.com 5        online 2011-07-22T18:09:09.769106Z
 
-    $ pkgrepo info -s https://pkg.omnios.org/r151038/core/
+    $ pkgrepo info -s https://pkg.openindiana.org/hipster/
     PUBLISHER PACKAGES STATUS           UPDATED
-    omnios    863      online           2021-11-17T09:27:46.600621Z
+    openindiana.org    863      online           2021-11-17T09:27:46.600621Z
 .Ed
 .It Sy Example 3 No Rebuild Catalogs and Search Data
 .Pp
@@ -822,29 +822,29 @@ Refresh the repository's catalogs and search data.
     publisher  prefix   ""
     repository version  4
 
-    $ pkgrepo get -s https://pkg.omnios.org/r151040/core/
+    $ pkgrepo get -s https://pkg.openindiana.org/hipster/
     SECTION    PROPERTY                     VALUE
-    publisher  prefix                       omnios
+    publisher  prefix                       openindiana.org
     repository check-certificate-revocation False
     repository signature-required-names     ()
-    repository trust-anchor-directory       /etc/ssl/pkg/
+    repository trust-anchor-directory       /etc/certs/CA/
     repository version                      4
 .Ed
 .It Sy Example 6 No Display All Publisher Properties
 .Bd -literal
-    $ pkgrepo get -s https://pkg.omnios.org/r151040/core/ -p all
+    $ pkgrepo get -s https://pkg.openindiana.org/hipster/ -p all
     PUBLISHER SECTION    PROPERTY         VALUE
-    omnios    publisher  alias
-    omnios    publisher  prefix           omnios
-    omnios    repository collection-type  core
-    omnios    repository description      Packages\ for\ OmniOS\ r151040
-    omnios    repository legal-uris       ()
-    omnios    repository mirrors          ()
-    omnios    repository name             OmniOS\ r151040\ core
-    omnios    repository origins          ()
-    omnios    repository refresh-seconds
-    omnios    repository registration-uri ""
-    omnios    repository related-uris     ()
+    openindiana.org    publisher  alias
+    openindiana.org    publisher  prefix           openindiana.org
+    openindiana.org    repository collection-type  core
+    openindiana.org    repository description      Packages\ for\ OpenIndiana\ Hipster
+    openindiana.org    repository legal-uris       ()
+    openindiana.org    repository mirrors          ()
+    openindiana.org    repository name             OpenIndiana\ Hipster\ core
+    openindiana.org    repository origins          ()
+    openindiana.org    repository refresh-seconds
+    openindiana.org    repository registration-uri ""
+    openindiana.org    repository related-uris     ()
 .Ed
 .It Sy Example 7 No Set the Default Publisher
 .Bd -literal
@@ -895,3 +895,5 @@ and may change at any time.
 .Xr glob 3C ,
 .Xr pkg 7 ,
 .Xr pkg.depotd 8
+.Pp
+.Lk https://github.com/OpenIndiana/pkg5/

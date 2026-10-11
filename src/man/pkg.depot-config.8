@@ -1,6 +1,6 @@
 '\" te
 .\" Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
-.TH pkg.depot-config 8 "31 Mar 2014" "OmniOS" "System Administration Commands"
+.TH pkg.depot-config 8 "31 Mar 2014" "SunOS 5.11" "System Administration Commands"
 .SH NAME
 pkg.depot-config \- Image Packaging System HTTP depot configuration generator
 .SH SYNOPSIS
@@ -80,7 +80,7 @@ The following options are supported:
 .ne 2
 .mk
 .na
-\fB-d\fR \fIprefix\fR=\fIrepository_dir\fR
+\fB\fB-d\fR \fIprefix\fR=\fIrepository_dir\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -91,7 +91,7 @@ Specify the path to a \fBpkg\fR(7) file repository to use. The \fIprefix\fR is u
 .ne 2
 .mk
 .na
-\fB-S\fR
+\fB\fB-S\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -102,7 +102,7 @@ Query the system for repositories to use. The \fB-S\fR option causes \fBpkg.depo
 .ne 2
 .mk
 .na
-\fB-r\fR \fIruntime_dir\fR
+\fB\fB-r\fR \fIruntime_dir\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -113,7 +113,7 @@ Specify the default output directory for configuration files. This directory can
 .ne 2
 .mk
 .na
-\fB-c\fR \fIcache_dir\fR
+\fB\fB-c\fR \fIcache_dir\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -124,7 +124,7 @@ Specify the directory where the depot stores its cache. If the \fB-A\fR option i
 .ne 2
 .mk
 .na
-\fB-s\fR \fIcache_size\fR
+\fB\fB-s\fR \fIcache_size\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -135,7 +135,7 @@ Specify the maximum cache size for the depot. The \fIcache_size\fR value is an i
 .ne 2
 .mk
 .na
-\fB-p\fR \fIport\fR
+\fB\fB-p\fR \fIport\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -146,7 +146,7 @@ Specify the port number that the depot will listen to. The default value of \fIp
 .ne 2
 .mk
 .na
-\fB-h\fR \fIhostname\fR
+\fB\fB-h\fR \fIhostname\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -157,7 +157,7 @@ Specify the host name to use as the argument to the Apache \fBServerName\fR dire
 .ne 2
 .mk
 .na
-\fB-l\fR \fIlogs_dir\fR
+\fB\fB-l\fR \fIlogs_dir\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -168,7 +168,7 @@ Specify the directory where the depot stores log files. The default value of \fI
 .ne 2
 .mk
 .na
-\fB-T\fR \fItemplate_dir\fR
+\fB\fB-T\fR \fItemplate_dir\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -190,7 +190,7 @@ Refresh any search indices maintained by the depot when \fBpkgrepo refresh\fR is
 .ne 2
 .mk
 .na
-\fB-t\fR \fIserver_type\fR
+\fB\fB-t\fR \fIserver_type\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -205,14 +205,14 @@ Specify the type of web server that \fBpkg.depot-config\fR should output configu
 .ad
 .sp .6
 .RS 4n
-Produce a partial configuration that enables a web server to serve basic \fBpkg\fR(7) installation operations for clients using an existing web service. For an Apache web server running on the OpenIndiana, the partial configuration file could be placed in \fB/etc/apache2/2.2/conf.d\fR. For other operating systems, consult your OS documentation to determine how to use this partial configuration file. See also the \fB-P\fR option.
+Produce a partial configuration that enables a web server to serve basic \fBpkg\fR(7) installation operations for clients using an existing web service. For an Apache web server running on the OpenIndiana, the partial configuration file could be placed in \fB/etc/apache2/2.4/conf.d\fR. For other operating systems, consult your OS documentation to determine how to use this partial configuration file. See also the \fB-P\fR option.
 .RE
 
 .sp
 .ne 2
 .mk
 .na
-\fB-P\fR \fIserver_prefix\fR
+\fB\fB-P\fR \fIserver_prefix\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -234,7 +234,7 @@ Enable the HTTPS service. This option cannot be used with the \fB-F\fR or \fB-P\
 .ne 2
 .mk
 .na
-\fB--cert\fR \fIserver_cert_file\fR
+\fB\fB--cert\fR \fIserver_cert_file\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -245,7 +245,7 @@ Specify the location of the server certificate file. This option can only be use
 .ne 2
 .mk
 .na
-\fB--key\fR \fIserver_key_file\fR
+\fB\fB--key\fR \fIserver_key_file\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -256,7 +256,7 @@ Specify the location of the server key file. This option can only be used with t
 .ne 2
 .mk
 .na
-\fB--cert-key-dir\fR \fIcert_key_directory\fR
+\fB\fB--cert-key-dir\fR \fIcert_key_directory\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -267,7 +267,7 @@ Specify the directory where the automatically generated certificates and keys sh
 .ne 2
 .mk
 .na
-\fB--ca-cert\fR \fIssl_ca_cert_file\fR
+\fB\fB--ca-cert\fR \fIssl_ca_cert_file\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -278,7 +278,7 @@ Specify the location of the top CA certificate file. This option can only be use
 .ne 2
 .mk
 .na
-\fB--ca-key\fR \fIssl_ca_key_file\fR
+\fB\fB--ca-key\fR \fIssl_ca_key_file\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -289,7 +289,7 @@ Specify the location of the top CA key file. This option can only be used with t
 .ne 2
 .mk
 .na
-\fB--cert-chain\fR \fIssl_cert_chain_file\fR
+\fB\fB--cert-chain\fR \fIssl_cert_chain_file\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -300,7 +300,7 @@ This option can only be used with the \fB--https\fR option. This option is requi
 .ne 2
 .mk
 .na
-\fB--smf-fmri\fR \fIsmf_pkg_depot_fmri\fR
+\fB\fB--smf-fmri\fR \fIsmf_pkg_depot_fmri\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -352,7 +352,7 @@ online   Feb_03   svc:/application/pkg/server:userland
 \fBExample 2 \fRShowing Processes Associated With the Depot
 .sp
 .LP
-The following command shows \fBhttpd.worker\fR processes associated with the \fBpkg/depot\fR service.
+The following command shows \fBhttpd\fR processes associated with the \fBpkg/depot\fR service.
 
 .sp
 .in +2
@@ -360,12 +360,12 @@ The following command shows \fBhttpd.worker\fR processes associated with the \fB
 $ \fBsvcs -p pkg/depot\fR
 STATE    STIME    FMRI
 online   16:59:49 svc:/application/pkg/depot:default
-         16:59:48     6731 httpd.worker
-         16:59:48     6736 httpd.worker
-         16:59:48     6737 httpd.worker
-         16:59:48     6738 httpd.worker
-         17:00:05     6744 httpd.worker
-         17:05:59     6915 httpd.worker
+         16:59:48     6731 httpd
+         16:59:48     6736 httpd
+         16:59:48     6737 httpd
+         16:59:48     6738 httpd
+         17:00:05     6744 httpd
+         17:05:59     6915 httpd
 .fi
 .in -2
 .sp
@@ -378,7 +378,7 @@ The following exit values are returned:
 .ne 2
 .mk
 .na
-\fB0\fR
+\fB\fB0\fR\fR
 .ad
 .RS 13n
 .rt
@@ -389,7 +389,7 @@ Command succeeded.
 .ne 2
 .mk
 .na
-\fB1\fR
+\fB\fB1\fR\fR
 .ad
 .RS 13n
 .rt
@@ -400,7 +400,7 @@ Command failed.
 .ne 2
 .mk
 .na
-\fB2\fR
+\fB\fB2\fR\fR
 .ad
 .RS 13n
 .rt
@@ -431,3 +431,8 @@ Interface StabilityUncommitted
 .LP
 \fBsvcprop\fR(1), \fBsvcs\fR(1), \fBsvcadm\fR(8), \fBsvccfg\fR(8), \fBpkg.depotd\fR(8), \fBpkg\fR(7)
 .sp
+.LP
+\fICopying and Creating Package Repositories in Oracle Solaris 11.2\fR
+.sp
+.LP
+\fBhttps://github.com/OpenIndiana/pkg5/\fR

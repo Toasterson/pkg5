@@ -40,7 +40,9 @@ Supported attributes are:
 .Sm on
 .Xc
 .Pp
-This is a legacy option that no longer has any effect.
+Enables ACPI when set to
+.Sy on
+.Pq the default .
 .\" bootdisk
 .It Ic bootdisk Ar path Ns Op , Ns Cm serial Ns = Ns Ar serial
 .Pp
@@ -50,8 +52,6 @@ Additional disks can be specified using the
 .Ic disk
 attribute, see below.
 .Pp
-If the optional serial number is not provided, one will be automatically
-generated from the dataset name.
 The ZFS volume must also be mapped into the zone using a
 .Sy device
 block as shown in the example below.
@@ -61,132 +61,27 @@ A suitable ZFS volume can be created using the
 command, for example:
 .Pp
 .Dl zfs create -V 30G rpool/bootdisk2
-.\" bootdiskif
-.It Ic bootdiskif Ar type
-.Pp
-Specifies the type of interface to which the boot disk will be attached.
-See the description of the
-.Ic diskif
-attribute for a list of available interface types.
-.Pp
-If unset, the value of the
-.Ic diskif
-attribute will be used.
 .\" bootorder
-.It Ic bootorder Ar option Ns Oo \&, Ns Ar option Ns \&... Oc
+.It Ic bootorder Ar order
 .Pp
-Specifies the attempted boot order for the virtual machine.
-.Pp
-For the UEFI bootrom, the available options are:
-.Bl -tag -width bootdisk -offset 4n
-.It Cm shell
-The UEFI firmware shell.
-.It Cm path Ns Oo Ar N Oc
-The
-.Ar N Ns th
-boot entry that specifies a specific boot media path.
-The first such entry is selected with
-.Cm path
-or
-.Cm path0
-and subsequent ones use increasing suffixes.
-.It Cm bootdisk
-The disk defined using the
-.Ic bootdisk
-attribute.
-.It Cm disk Ns Oo Ar N Oc
-One of the disks defined with a
-.Ic disk
-attribute.
-.It Cm cdrom Ns Oo Ar N Oc
-One of the cdrom devices defined with a
-.Ic cdrom
-attribute.
-.Sm off
-.It Cm net Ns Oo Ar N Oc Op = Cm pxe | http
-.Sm on
-One of the zone's network devices.
-If the optional protocol is not specified, it defaults to
-.Cm pxe .
-.El
-.Pp
-For the legacy CSM bootrom, the available options are:
-.Bl -tag -width bootdisk -offset 4n
-.It Cm bootdisk
-The disk defined using the
-.Ic bootdisk
-attribute.
-.It Cm cdrom
-The first cdrom device found.
-.El
-.Pp
-For both bootroms, the following legacy aliases are supported but are
-deprecated.
-These must be used alone, without any additional options:
-.Bl -tag -width bootdisk -offset 4n
-.It Cm cd
-Legacy alias for
-.Sm off
-.Ic path0 , bootdisk , cdrom0
-.Sm on
-.It Cm dc
-Legacy alias for
-.Sm off
-.Ic cdrom0 , path0 , bootdisk
-.Sm on
-.El
-.Pp
-Default value:
-.Sm off
-.Ic path0 , bootdisk , cdrom0
-.Sm on
-.Pp
-Example:
-.Sm off
-.Ic net=http , cdrom1 , disk , bootdisk , shell
-.Sm on
-.\" bootnext
-.It Ic bootnext Ar option
-.Pp
-For the UEFI bootrom, specifies the boot device to be used for the next boot
-only, after which booting will revert to the standard boot order
-.Po device enumeration order, or that defined using the
-.Ic bootorder
-attribute
-.Pc .
-The
-.Ar option
-parameter is one of the
-.Ic bootorder
-values shown above for the UEFI bootrom.
+Controls whether the boot disk or CD-ROM is placed first in the device order.
+The default is
+.Sy cd
+.Pq boot disk first ;
+.Sy dc
+places the CD-ROM first.
+For Windows guests the device slots are fixed and this setting has no effect.
 .\" bootrom
 .It Ic bootrom Ar firmware
 .Pp
-Specifies the name of the boot ROM to use for starting the virtual machine.
-The available ROMs are:
-.Bl -tag -width Ar
-.It Sy BHYVE_RELEASE_CSM Pq default
-The default boot ROM that supports both UEFI and CSM (legacy) boot.
-If the VM supports UEFI boot, you should use
-.Sy BHYVE_RELEASE
-instead, since it incorporates newer firmware.
-.It Sy BHYVE_RELEASE
-Production ROM supporting UEFI boot only.
-.It Sy BHYVE
-An alias for
+Selects a boot ROM by name or absolute path.
+A name is resolved relative to
+.Pa /usr/share/bhyve/firmware
+and the suffix
+.Sy .fd
+is added if absent.
+The default is
 .Sy BHYVE_RELEASE .
-.It Sy BHYVE_CSM
-An alias for
-.Sy BHYVE_RELEASE_CSM .
-.It Sy BHYVE_DEBUG_CSM
-A version of the CSM ROM which produces debug messages to the console.
-.It Sy BHYVE_DEBUG
-A version of the UEFI ROM which produces debug messages to the console.
-.El
-.Pp
-The
-.Ar firmware
-parameter can also be specified as an absolute path to a custom ROM.
 .\" cdrom
 .It Ic cdrom Ns Oo Ar N Oc Ar path
 .Pp
@@ -205,67 +100,32 @@ Each image file must also be mapped into the zone using an
 .Sy fs
 block, as shown in the example below.
 .\" cloud-init
-.It Xo Ic cloud-init
-.Sm off
-.Ar on | off | filename | URL
-.Sm on
-.Xc
+.It Ic cloud-init Ar mode
 .Pp
-When this option is enabled, and set to
-.Ar on
-or a
-.Ar filename ,
-the guest will be booted with a small CD image attached that provides
-configuration data that
-.Sy cloud-init
-can use to automatically configure the guest operating system.
-When a file is provided, this is used directly for the provided
-.Pa user-data .
-If any network interfaces are configured with an
-.Sy allowed-address
-property, then that address will be provided along with the configuration
-data.
-See also the
-.Sy dns-domain ,
-.Sy password ,
-.Sy resolvers
+Configures the guest's cloud-init datasource using SMBIOS information.
+Supported aliases are
+.Sy on
+.Pq NoCloud ,
+.Sy http ,
 and
-.Sy sshkey
-options.
-.Pp
-If a
-.Ar URL
-is provided, then that is passed to the guest system as the source of the
-full meta-data.
-.\" com
-.It Ic com Ns Ar N Ar options
-.Pp
-This parameter configures a LPC COM port, with valid values for
-.Ar N
-ranging from 2 to 4.
-.Pp
-The supported
-.Ar options
-are either
-.Cm socket , Ns Ar path ,
-which places a UNIX domain socket at
-.Ar path ,
+.Sy https
+.Pq NoCloud over the network .
+For network datasources, set
+.Ic datasource
+to the server and path, without the URL scheme.
+Leave this attribute unset to disable cloud-init integration.
+.It Ic datasource Ar server/path
+The network datasource used with the
+.Sy http
 or
-.Pa /dev/ttyXX ,
-which attaches the COM port to a
-.Sy tty
-device.
-The latter format requires a
-.Sy device
-block to map
-.Pa /dev/ttyXX
-into the zone.
-.Pp
-A configuration for
-.Ic com Ns Ar 1
-will be silently ignored, the
-.Ic console
-parameter described below must be used instead.
+.Sy https
+cloud-init aliases.
+.It Ic cloud-config Ar filename
+A guest user-data file to include in the generated cloud-init ISO.
+.It Ic password Ar string
+A password to include in cloud-init user-data when no
+.Ic cloud-config
+file is supplied.
 .\" console
 .It Ic console Ar options
 .Pp
@@ -281,13 +141,6 @@ Other supported values include
 which places a UNIX domain socket at
 .Ql <path>
 through which the console can be accessed.
-.\" debug.persist
-.It Ic debug.persist Ar on Ns | Ns Ar off
-A debugging option that causes the zone to keep running after the VM terminates.
-This can be used, for example, to allow a terminated VM to be inspected with the
-.Fl b
-option of
-.Xr mdb 1 .
 .\" disk
 .It Ic disk Ns Oo Ar N Oc Ar dataset Ns Op , Ns Cm serial Ns = Ns Ar serial
 .Pp
@@ -305,8 +158,6 @@ The disks specified via the
 attribute are in addition to the system boot disk, which is specified using
 .Ic bootdisk .
 .Pp
-If the optional serial number is not provided, one will be automatically
-generated from the dataset name.
 Each ZFS volume must also be mapped into the zone using a
 .Sy device
 block as shown in the example below.
@@ -317,40 +168,14 @@ Specifies the type of interface to which the disks will be attached.
 Available options are:
 .Bl -bullet
 .It
-.Sy ahci
-.It
-.Sy nvme
+.Sy ahci-hd
 .It
 .Sy virtio-blk Pq default
 .El
-.\" diskifN
-.It Ic diskif Ns Ar N Ar type
-.Pp
-Override the
-.Sy diskif
-.Ar type
-for the disk at target
-.Ar N .
-.\" dns-domain
-.It Ic dns-domain Ar domainname
-.Pp
-The DNS domain name for the guest.
-Included in the data passed to the guest when the
-.Sy cloud-init
-option is enabled.
 .\" extra
-.It Ic extra Ns Op Ar N
+.It Ic extra Ar options
 .Pp
-Any extra
-.Ar options
-to be passed directly to the
-.Nm
-hypervisor.
-To add multiple options, create multiple attriutes with different values of
-.Ar N .
-If only a single extra option is required,
-.Ar N
-can be omitted.
+Additional hypervisor options, separated by spaces.
 .\" hostbridge
 .It Ic hostbridge Ar type
 .Pp
@@ -367,16 +192,12 @@ Available options are:
 .It
 .Sy q35
 .It
+.Sy none
+.It
 .Sm off
 .Sy vendor = Ar ID , Sy device = Ar ID
 .Sm on
 .El
-.\" memreserve
-.It Ic memreserve Ar on Ns | Ns Ar off
-When this option is enabled, memory is pre-allocated and retained even when
-the zone is shut down.
-This is useful to prevent memory being re-used by the system for other things
-such as the ZFS cache (ARC) when the zone is not running.
 .\" netif
 .It Ic netif Ar type
 .Pp
@@ -387,81 +208,11 @@ Available options are:
 .It
 .Sy virtio-net-viona Pq accelerated virtio interface, default
 .It
-.Sy virtio-net Pq legacy virtio interface
-.It
 .Sy e1000
 .El
 .Pp
 Note that only the accelerated virtio interface supports filtering using the
 zone firewall.
-.\" password
-.It Xo Ic password
-.Sm off
-.Ar string | hash | filename
-.Sm on
-.Xc
-.Pp
-When the
-.Sy cloud-init
-option is enabled, the provided
-.Ar password
-will be passed to the guest which can use it to set the password for the
-default user.
-Depending on the guest, this may be the root user or a distribution-dependant
-initial user.
-The password can be provided as a fixed string, a pre-computed hash or a path
-to a file that contains the desired password or password hash, relative to
-the global zone root.
-.\" priv.debug
-.It Ic priv.debug Ar on Ns | Ns Ar off
-Set to
-.Ar on
-to enable debugging for privilege management.
-The debug messages will appear in the zone's
-.Pa /tmp/init.log .
-.\" ppt
-.It Ic ppt Ns Ar N Cm on Ns | Ns Cm off Ns | Ns Cm slot Ns Ar S
-.Pp
-Pass through a PCI device to the guest.
-Available devices for pass-through can be viewed with
-.Ql pptadm list -a .
-.Ar N
-must match the number of the desired device.
-Set to
-.Cm on
-to enable pass-through, and to
-.Cm off
-to disable it, or use
-.Cm slot Ns Ar S
-as described below.
-.Pp
-Pass-through devices are presented to the guest in numerical order by default.
-An explicit order can be forced by setting the attribute value to
-.Cm slot Ns Ar S
-.Pq Ar S No between 0 and 7
-in which case the device will be placed into slot
-.Ar S ,
-and any other devices will be added in numerical order around it.
-.Pp
-The
-.Pa /dev/ppt Ns Ar N
-device must also be passed through to the guest via a
-.Sy device
-block.
-.Pp
-To enable a PCI device for pass-through, it must be bound to the
-.Sy ppt
-driver and added to the
-.Pa /etc/ppt_matches
-file, after which it will be visible in the output of
-.Ql pptadm list -a .
-The binding can be achieved using
-.Xr update_drv 8
-or by adding an entry to the
-.Pa /etc/ppt_aliases
-file
-.Pq in the same format as Pa /etc/driver_aliases
-and rebooting.
 .\" ram
 .It Ic ram Ar size Ns Op Cm KMGT
 .Pp
@@ -478,43 +229,7 @@ to indicate a multiple of kibibytes, mebibytes, gibibytes or tebibytes.
 If no suffix is given, the value is assumed to be in mebibytes.
 .Pp
 The default value, if this attribute is not specified, is
-.Sy 256M .
-.\" resolvers
-.It Ic resolvers Ar resolver Ns Oo \&, Ns Ar resolver Ns \&... Oc
-.Pp
-A comma-delimited list of DNS resolver IP addresses.
-These are included in the data passed to the guest when the
-.Sy cloud-init
-option is enabled.
-.\" rng
-.It Xo Ic rng
-.Sm off
-.Ar on | off
-.Sm on
-.Xc
-.Pp
-Set to
-.Ar on
-to attach a virtio random number generator
-.Pq RNG
-to the guest
-.Pq default: Ar off .
-.\" sshkey
-.It Xo Ic sshkey
-.Sm off
-.Ar string | filename
-.Xc
-.Sm on
-.Pp
-When the
-.Sy cloud-init
-option is enabled, the provided
-.Ar sshkey
-will be passed to the guest which can use it to set the authorised SSH keys
-for the default user and/or the root user.
-.Ar sshkey
-can be provided as a fixed string or a path to a file that contains the desired
-public key.
+.Sy 1G .
 .\" type
 .It Ic type Ar type
 .Pp
@@ -531,94 +246,26 @@ Supported values are:
 .It
 .Sy windows
 .El
-.It Xo Ic uefivars
-.Sm off
-.Ar on | off
-.Sm on
-.Xc
-.Pp
-Enable or disable persistent UEFI variables.
-Defaults to
-.Cm on .
-.\" uuid
-.It Ic uuid Ar uuid
-.Pp
-Specifies the unique identifier for the virtual machine.
-If this attribute is not set, a random UUID will be generated when the zone
-is first installed.
 .\" vcpus
-.It Xo Ic vcpus
-.Sm off
-.Oo Cm cpus = Oc Ar numcpus
-.Oo Cm ,sockets = Ar s Oc
-.Oo Cm ,cores = Ar c Oc
-.Oo Cm ,threads = Ar t Oc
-.Xc
-.Sm on
+.It Ic vcpus Ar number-or-topology
 .Pp
-Specify the number of guest virtual CPUs and/or the CPU topology.
-The default value for each of the parameters is
+Specifies the CPU count or topology string passed to the hypervisor's
+.Fl c
+option.
+The default is
 .Sy 1 .
-The topology must be consistent in that
-.Ar numcpus
-must equal the product of the other parameters.
+.It Ic socket Ar mode
 .Pp
-The maximum supported number of virtual CPUs is
-.Sy 32 .
-.It Xo
-.Ic virtfs Ns Op Ar N
-.Sm off
-.Ar sharename \&,
-.Ar path
-.Op Cm ,ro
-.Sm on
-.Xc
-.Pp
-Share a filesystem to the guest using Virtio 9p (VirtFS).
-The specified
-.Ar path
-is presented over PCI as a share named
-.Ar sharename .
-The optional
-.Cm ro
-option configures the share as read-only.
-The filesystem path being shared must also be mapped into the zone, using
-either a delegated dataset or a loopback
-.Pq lofs
-mount.
-See the
-.Sx EXAMPLES
-section below.
-.\" virtio-console
-.It Ic virtio-console Ns Oo Ar N Oc Ar name Ns = Ns path
-.Pp
-Configures a named virtio-console device.
-The
-.Ar name
-is the name of the device as seen by the guest,
-.Ar path
-is the path to a socket in the zone to be used for I/O.
-.Pp
-See the
-.Sx EXAMPLES
-section below.
-.\" vga
-.It Ic vga Ar off Ns | Ns Ar on Ns | Ns Ar io
-.Pp
-Specify the type of VGA emulation to use when the framebuffer and VNC server
-are enabled.
-Possible values for this option are:
-.Bl -tag -width Ds
-.It Sy off Pq default
-This option should be used for UEFI guests that assume that the VGA adapter is
-present if they detect the I/O ports.
-.It Sy on
-This option should be used along with the CSM bootrom to boot traditional BIOS
-guests that require the legacy VGA I/O and memory regions to be available.
-.It Sy io
-This option should be used for guests that attempt to issue BIOS calls which
-result in I/O port queries and fail to boot if I/O decode is disabled.
-.El
+Attaches a virtio console using UNIX sockets.
+.Sy on
+creates port 1 at
+.Pa /tmp/console1.sock ;
+.Sy on1
+also creates port 2 at
+.Pa /tmp/console2.sock ;
+.Sy on2
+also creates port 3 at
+.Pa /tmp/console3.sock .
 .It Xo Ic vnc
 .Sm off
 .Ar on | wait | off | options
@@ -657,15 +304,8 @@ Specifies the horizontal screen resolution
 .It Sy h Ns = Ns Ar pixels
 Specifies the vertical screen resolution
 .Pq default: 768, max: 1200
-.It Xo
-.Sm off
-.Sy password = Ar string | filename
-.Sm on
-.Xc
-Specifies a password for the VNC server.
-If no password is specified, no authentication is required.
-The password can be provided as a fixed string or a path to a file that
-contains the desired password, relative to the global zone root.
+.It Sy password Ns = Ns Ar string
+Passes a password string to the framebuffer device.
 .It Sy wait
 Pause boot until the first VNC connection is established.
 .El
@@ -675,17 +315,7 @@ See also
 .Ic xhci
 below.
 .Pp
-The
-.Nm
-brand also ships a mini socat utility that can be used to connect the socket to
-a TCP port.
-The utility can be invoked like so:
-.Bd -literal -offset indent
-/usr/lib/brand/bhyve/socat \e
-        /zones/bhyve/root/tmp/vm.vnc 5905
-.Ed
-.Pp
-If you prefer, you can also use the real socat utility that's shipped in core:
+A socat utility can connect the VNC socket to a TCP port, for example:
 .Bd -literal -offset indent
 /usr/bin/socat \e
         TCP-LISTEN:5905,bind=127.0.0.1,reuseaddr,fork \e
@@ -743,57 +373,6 @@ add attr
     set name=cdrom
     set type=string
     set value=/rpool/iso/debian-9.4.0-amd64-netinst.iso
-end
-add attr
-    set name=virtio-console
-    set type=string
-    set value="org.qemu.guest_agent.0=/tmp/vm.qga.sock"
-end
-.Ed
-.Pp
-The following example shows how to share a delegated dataset called
-.Pa rpool/datavol
-to a guest using VirtFS.
-This assumes that the mountpoint attribute on
-.Pa rpool/datavol
-is set to
-.Pa /datavol .
-This could have been done, for example, by creating the dataset with:
-.Pp
-.Dl zfs create -o mountpoint=/datavol -o zoned=on rpool/datavol
-.Pp
-Setting the
-.Sy mountpoint
-and
-.Sy zoned
-attributes at the same time prevents the filesystem from ever being mounted in
-the global zone.
-.Bd -literal -offset indent
-add dataset
-    set name=rpool/datavol
-end
-add attr
-    set name=virtfs0
-    set type=string
-    set value=datavol,/datavol
-end
-.Ed
-.Pp
-and to share the global zone filesystem
-.Pa /data/websites
-read-only to the guest, add:
-.Bd -literal -offset indent
-add fs
-    set dir="/data/websites"
-    set special="/data/websites"
-    set type="lofs"
-    add options ro
-    add options nodevices
-end
-add attr
-    set name=virtfs1
-    set type=string
-    set value=websites,/data/websites,ro
 end
 .Ed
 .Sh SEE ALSO

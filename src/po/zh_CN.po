@@ -2963,10 +2963,6 @@ msgstr "更新(_U)"
 msgid "_View"
 msgstr "查看(_V)"
 
-#: ../gui/data/packagemanager.ui.glade.h:169 ../modules/gui/repository.py:90
-msgid "e.g. https://pkg.omnios.org/r151022/core"
-msgstr "例如 https://pkg.omnios.org/r151022/core"
-
 #: ../gui/data/packagemanager.ui.h:170
 msgid "label"
 msgstr "标签"

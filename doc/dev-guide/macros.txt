@@ -1,6 +1,5 @@
 
-.. |logo| image:: ../../doc/dev-guide/pkg-block-logo.png
-.. |ologo| image:: ../../doc/dev-guide/ologo.png
+.. |oilogo| image:: ../../doc/dev-guide/oi_logo.jpg
 
 .. Some basic macros, possibly links to man pages?
 
@@ -23,8 +22,8 @@
 .. |pkginfo| replace:: ``pkginfo(4)``
 .. |pkgmap| replace:: ``pkgmap(4)``
 
-.. |svc.startd| replace:: ``svc.startd(1M)``
-.. |beadm| replace:: ``beadm(1M)``
+.. |svc.startd| replace:: ``svc.startd(8)``
+.. |beadm| replace:: ``beadm(8)``
 .. |zonecfg| replace:: ``zonecfg(8)``
 
 .. Terminology - we want hyperlinks to the right places for these eventually

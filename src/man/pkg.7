@@ -25,7 +25,7 @@ with the scheme
 A fully qualified FMRI consists of the scheme, a publisher, the package
 name, and a version string, as shown in the annotated example below:
 .Bd -literal -offset indent
-pkg://omnios/terminal/tmux@3.1.2,5.11-151036.0:20201029T171510Z
+pkg://openindiana.org/terminal/tmux@3.1.2,5.11-151036.0:20201029T171510Z
 \e_/   \e____/ \e___________/ \e___/ \e__/ \e______/ \e______________/
  |      |          |         |    |      |            |
  |      |          |         |    |      |            timestamp
@@ -1583,7 +1583,7 @@ of the incorporation.
 .Pp
 Since an incorporation is simply a package, it can be removed, and all the
 constraints it delivers are therefore relaxed.
-However, many of the incorporations delivered by OmniOS are required by the
+However, many of the incorporations delivered by OpenIndiana are required by the
 packages they incorporate because that relaxation would not be safe.
 .Pp
 Attempting an upgrade of a package to a version that is not allowed by an
@@ -1858,13 +1858,7 @@ variant can be set to
 .Sy ppc ,
 .Sy arm ,
 .Sy aarch64 ,
-or whatever architectures the distribution supports
-.Po only
-.Sy i386
-and
-.Sy aarch64
-are used in OmniOS
-.Pc .
+or whatever architectures the distribution supports.
 The exceptions are the
 .Sy debug
 variants.
@@ -1920,8 +1914,13 @@ are
 .Sy true
 in the image
 .Po
+.Sy false
+is the default for facets starting with
+.Sq Sy facet.debug\&.
+or
+.Sq Sy facet.optional\&. ;
 .Sy true
-is the default
+is the default for all others
 .Pc .
 .It
 If any facet tags on the action have a value of
@@ -2021,3 +2020,5 @@ directory hierarchy are Private, and are subject to change.
 .Xr devlinks 8 ,
 .Xr pkg.depotd 8 ,
 .Xr svcadm 8
+.Pp
+.Lk https://github.com/OpenIndiana/pkg5/

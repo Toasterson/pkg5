@@ -23,11 +23,11 @@
 
 .. Hyperlinks
 
-.. _pkg-project: https://github.com/omniosorg/pkg5/
+.. _pkg-project: https://github.com/OpenIndiana/pkg5/
 
-.. _pkg-opensolaris-release: https://github.com/omniosorg/pkg5/
+.. _pkg-opensolaris-release: https://pkg.openindiana.org/hipster/
 
-.. _pkg-opensolaris-dev: https://github.com/omniosorg/pkg5/
+.. _pkg-opensolaris-dev: https://pkg.openindiana.org/hipster/
 
 
 .. Substitutions
@@ -50,4 +50,4 @@
 .. |beadm8| replace:: ``beadm``\ (8)
 .. |libbe3lib| replace:: ``libbe``\ (3LIB)
 
-.. |OS_Name| replace:: OmniOS
+.. |OS_Name| replace:: OpenIndiana

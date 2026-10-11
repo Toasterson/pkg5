@@ -801,127 +801,32 @@ Appendix: Reference manual pages
 pkg(1)
 ======
 
-.. raw:: html
-
-   <pre>
-
-.. raw:: html
-   :file: ../src/man/pkg.1.txt
-
-.. raw:: html
-
-   </pre>
-
-.. raw:: latex
-
-   \begin{verbatim}
-
-.. raw:: latex
-   :file: ../src/man/pkg.1.txt
-
-.. raw:: latex
-
-   \end{verbatim}
+.. include:: man-out/pkg.1.txt
+   :literal:
 
 pkgrecv(1)
 ==========
 
-.. raw:: html
-
-   <pre>
-
-.. raw:: html
-   :file: ../src/man/pkgrecv.1.txt
-
-.. raw:: html
-
-   </pre>
-
-.. raw:: latex
-
-   \begin{verbatim}
-
-.. raw:: latex
-   :file: ../src/man/pkgrecv.1.txt
-
-.. raw:: latex
-
-   \end{verbatim}
+.. include:: man-out/pkgrecv.1.txt
+   :literal:
 
 pkgsend(1)
 ==========
 
-.. raw:: html
-
-   <pre>
-
-.. raw:: html
-   :file: ../src/man/pkgsend.1.txt
-
-.. raw:: html
-
-   </pre>
-
-.. raw:: latex
-
-   \begin{verbatim}
-
-.. raw:: latex
-   :file: ../src/man/pkgsend.1.txt
-
-.. raw:: latex
-
-   \end{verbatim}
+.. include:: man-out/pkgsend.1.txt
+   :literal:
 
 pkg.depotd(8)
-==============
+=============
 
-.. raw:: html
-
-   <pre>
-
-.. raw:: html
-   :file: ../src/man/pkg.depotd.1m.txt
-
-.. raw:: html
-
-   </pre>
-
-.. raw:: latex
-
-   \begin{verbatim}
-
-.. raw:: latex
-   :file: ../src/man/pkg.depotd.1m.txt
-
-.. raw:: latex
-
-   \end{verbatim}
+.. include:: man-out/pkg.depotd.8.txt
+   :literal:
 
 pkg(7)
 ======
 
-.. raw:: html
-
-   <pre>
-
-.. raw:: html
-   :file: ../src/man/pkg.5.txt
-
-.. raw:: html
-
-   </pre>
-
-.. raw:: latex
-
-   \begin{verbatim}
-
-.. raw:: latex
-   :file: ../src/man/pkg.5.txt
-
-.. raw:: latex
-
-   \end{verbatim}
+.. include:: man-out/pkg.7.txt
+   :literal:
 
 ---------------------------
 Appendix:  Protocol details

@@ -167,10 +167,10 @@ denote the numbered package version, and the characters from the
 .Sy \&:
 to the end denote the timestamp portion of the version string.
 .Bd -literal -offset 4n
-pkg://omnios/package/pkg@0.5.11-151038.1:20120904T180335Z
-pkg://omnios/package/pkg@0.5.11-151038.1:20120903T170234Z
-pkg://omnios/package/pkg@0.5.11-151038.0:20120820T165108Z
-pkg://omnios/package/pkg@0.5.11-151038.0:20120819T155007Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.1:20120904T180335Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.1:20120903T170234Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.0:20120820T165108Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.0:20120819T155007Z
 .Ed
 .Bl -tag -width Ds
 .It Sy all-timestamps
@@ -190,8 +190,8 @@ or
 .Ar pattern .
 In the example above, the following two packages are retrieved:
 .Bd -literal -offset 2n
-pkg://omnios/package/pkg@0.5.11-151038.1:20120904T180335Z
-pkg://omnios/package/pkg@0.5.11-151038.0:20120820T165108Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.1:20120904T180335Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.0:20120820T165108Z
 .Ed
 .It Sy latest
 Retrieve only the newest version of each matching
@@ -200,7 +200,7 @@ or
 .Ar pattern .
 In the example above, only the following package is retrieved:
 .Bd -literal -offset 2n
-pkg://omnios/package/pkg@0.5.11-151038.1:20120904T180335Z
+pkg://openindiana.org/package/pkg@0.5.11-151038.1:20120904T180335Z
 .Ed
 .El
 .It Fl \&-mog-file Ar file_path
@@ -322,9 +322,9 @@ List the newest packages available from the repository on the system named
 .Sy test .
 .Bd -literal -offset 4n
 pkgrecv -s http://test --newest
-pkg://omnios/system/library/c++-runtime@0.5.11,151038.0:20120921T190358Z
-pkg://omnios/system/library/freetype-2@2.4.8,151038.0:20120109T215840Z
-pkg://omnios/system/library/math@0.5.11,151038.0:20120921T190432Z
+pkg://openindiana.org/system/library/c++-runtime@0.5.11,151038.0:20120921T190358Z
+pkg://openindiana.org/system/library/freetype-2@2.4.8,151038.0:20120109T215840Z
+pkg://openindiana.org/system/library/math@0.5.11,151038.0:20120921T190432Z
 .Ed
 .Pp
 .Sy Example 2 No Retrieve Raw Package Data
@@ -337,7 +337,7 @@ package from Example 1 in a format suitable for use with
 pkgrecv -s http://test \e
     -d /local/repo --raw \e
     c++-runtime@0.5.11,151038.0:20120921T190358Z
-    Processing packages for publisher omnios ...
+    Processing packages for publisher openindiana.org ...
     Retrieving and evaluating 1 package(s)
     PROCESS       ITEMS     GET (MB)    SEND (MB)
     Completed       1/1      3.5/3.5      0.0/0.0
@@ -364,7 +364,7 @@ from the system named
 .Bd -literal -offset 4n
 pkgrecv -s http://test -d /local/repo -m latest -v \e
     editor/vim
-Processing packages for publisher omnios ...
+Processing packages for publisher openindiana.org ...
 Retrieving and evaluating 1 package(s)
 Retrieving packages ...
 Packages to add:       1
@@ -403,22 +403,22 @@ pkgrecv -s /export/repo -d /local/repo -r editor/gnu-emacs
 .Pp
 Receive all packages that do not already exist and all changed content from the
 repository located at
-.Lk https://pkg.omnios.org/bloody/core/
+.Lk https://pkg.openindiana.org/hipster/
 to the repository located at
-.Pa /export/bloody .
+.Pa /export/hipster .
 .Bd -literal -offset 4n
-pkgrecv -s https://pkg.omnios.org/bloody/core/ \e
-    -d /export/bloody -m all-timestamps '*'
+pkgrecv -s https://pkg.openindiana.org/hipster/ \e
+    -d /export/hipster -m all-timestamps '*'
 .Ed
 .Pp
 Receive all packages that do not already exist and all changed content from the
 secure repository located at
-.Lk https://pkg.omnios.org/bloody/core/
+.Lk https://pkg.openindiana.org/hipster/
 to the repository located at
-.Pa /export/bloody .
+.Pa /export/hipster .
 .Bd -literal -offset 4n
-pkgrecv -s https://pkg.omnios.org/bloody/core/ \e
-    -d /export/bloody -m all-timestamps \e
+pkgrecv -s https://pkg.openindiana.org/hipster/ \e
+    -d /export/hipster -m all-timestamps \e
     --key /var/pkg/ssl/Your-Organisation.key.pem \e
     --cert /var/pkg/ssl/Your-Organisation.certificate.pem '*'
 .Ed
@@ -447,14 +447,17 @@ pkgrecv -s /my/archive.p5p -d /export/repo '*'
 .Pp
 Change the publisher name of the package
 .Sq foo
-and all its dependencies into
+into
 .Sq extra
 during republishing.
 .Bd -literal -offset 4n
-echo '<transform set name=pkg.fmri -> edit value
-    (pkg://).*?(/.*) \e1extra\e2' | \e
-    pkgrecv -s repo1 -d repo2 --mog-file - foo
+$ echo '<transform set name=pkg.fmri -> edit value pkg://[^/]+/ pkg://extra/>' > /tmp/x.tr
+$ pkgrecv -s repo1 -d repo2 --mog-file /tmp/x.tr foo
+$ pkgrepo rebuild -s repo2
 .Ed
+.Pp
+Backreferences can also be used in the replacement string of the transform
+but they are complex and error-prone.
 .Sh ENVIRONMENT VARIABLES
 The following environment variables are supported:
 .Bl -tag -width Ds
@@ -488,3 +491,5 @@ and may change at any time.
 .Xr pkgsend 1 ,
 .Xr pkg 7 ,
 .Xr pkg.depotd 8
+.Pp
+.Lk https://github.com/OpenIndiana/pkg5/
