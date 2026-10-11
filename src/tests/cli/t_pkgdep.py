@@ -1230,8 +1230,8 @@ file NOHASH group=bin mode=0555 owner=root path=c/bin/perl variant.foo=c
         # Make sure to quote the runpaths, as they may contain tokens
         # like $PLATFORM which we do not want the shell to evaluate.
         opts = ["-R'{0}'".format(rp) for rp in run_paths]
-        if bit64:
-            opts.append("-m64")
+        # These fixtures distinguish 32-bit and 64-bit ELF run paths.
+        opts.append("-m64" if bit64 else "-m32")
         if shared_lib:
             # Always link to libc; the compiler may not.
             opts.append("-lc")

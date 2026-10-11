@@ -605,7 +605,7 @@ class TestPkgHistory(pkg5unittest.ManyDepotTestCase):
         root = tree.getroot()
         operation = root.find("operation")
         operation.attrib["start_time"] = datetime.datetime.fromtimestamp(
-            0, datetime.UTC
+            0, datetime.timezone.utc
         ).strftime("%Y%m%dT%H%M%SZ")
         operation.attrib["end_time"] = "20120229T000000Z"
 

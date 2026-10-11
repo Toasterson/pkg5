@@ -491,7 +491,7 @@ class TestVersion(pkg5unittest.Pkg5TestCase):
         self.assertIsNone(self.v3.get_timestamp())
 
     def testversionsettime(self):
-        d = datetime.datetime.now(datetime.UTC)
+        d = datetime.datetime.now(datetime.timezone.utc)
         # 'd' includes microseconds, so we trim those off.
         d = d.replace(microsecond=0)
         self.v1.set_timestamp(d)

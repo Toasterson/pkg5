@@ -89,15 +89,15 @@ def setup_environment(path_to_proto, debug=False, system_test=False):
     proto_area = os.path.realpath(proto_area)
 
     py_version = ".".join(platform.python_version_tuple()[:2])
-    bundledpkgs = os.path.join(
-        pkg_path, "usr/lib/pkg/python{0}".format(py_version)
-    )
     pkgs = os.path.join(
         pkg_path, "usr/lib/python{0}/vendor-packages".format(py_version)
     )
+    system_pkgs = "/usr/lib/python{0}/vendor-packages".format(py_version)
     sys.path, remainder = sys.path[:2], sys.path[2:]
-    addsitedir(bundledpkgs)
     addsitedir(pkgs)
+    # Dependencies come from the system; pkg itself comes from the proto area.
+    if system_pkgs != pkgs:
+        addsitedir(system_pkgs)
     sys.path.extend(remainder)
 
     bins = os.path.join(pkg_path, "usr/bin")
@@ -112,7 +112,7 @@ def setup_environment(path_to_proto, debug=False, system_test=False):
     else:
         pypath = ""
     os.environ["PYTHONPATH"] = (
-        os.pathsep.join([".", bundledpkgs, pkgs]) + pypath
+        os.pathsep.join([".", pkgs, system_pkgs]) + pypath
     )
 
     os.environ["PATH"] = bins + os.pathsep + os.environ["PATH"]

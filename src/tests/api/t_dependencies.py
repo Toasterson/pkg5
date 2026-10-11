@@ -1207,7 +1207,8 @@ file NOHASH group=sys mode=0755 owner=root path={runpath_mod_test_path}
     def make_elf(self, final_path, static=False):
         out_file = os.path.join(self.proto_dir, final_path)
 
-        opts = []
+        # These fixtures expect the 32-bit ELF default run paths.
+        opts = ["-m32"]
         # In some cases we want to generate an elf binary with no
         # dependencies of its own.  We use -c (suppress linking) for
         # this purpose.
