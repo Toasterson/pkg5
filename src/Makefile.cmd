@@ -30,9 +30,12 @@ BINS = \
 	pkgsign
 
 LIBS = \
-	pkg.depotd
+	pkg.depotd \
+	pkg.sysrepo \
+	pkg.depot-config
 
 TARGETS= $(BINS:%=$(ROOTUSRBIN)/%) $(LIBS:%=$(ROOTUSRLIB)/%)
+MODE = 555
 
 $(ROOTUSRBIN)/pkg		:= SRC = client.py
 $(ROOTUSRBIN)/pkgdepend		:= SRC = pkgdep.py
@@ -47,6 +50,10 @@ $(ROOTUSRBIN)/pkgsend		:= SRC = publish.py
 $(ROOTUSRBIN)/pkgrecv		:= SRC = pull.py
 $(ROOTUSRBIN)/pkgsign		:= SRC = sign.py
 $(ROOTUSRLIB)/pkg.depotd	:= SRC = depot.py
+$(ROOTUSRLIB)/pkg.sysrepo	:= SRC = sysrepo.py
+$(ROOTUSRLIB)/pkg.depot-config := SRC = depot-config.py
+
+$(ROOTUSRLIB)/pkg.sysrepo $(ROOTUSRLIB)/pkg.depot-config := MODE = 755
 
 all clean clobber:
 
@@ -57,7 +64,7 @@ $(TARGETS): FRC
 	$(MKDIR) $(@D)
 	$(RM) $@
 	$(SED) '1s/python3 /python$(PYVER) /' < $(SRC) > $@
-	$(CHMOD) 555 $@
+	$(CHMOD) $(MODE) $@
 
 # shebang...
 

@@ -7,7 +7,6 @@
 /src/brand/fmri_compare
 /src/brand/support
 /src/pkg/pkgtmp
-/src/pkg/generated
 /src/po/*.mo
 /src/po/i18n_errs.txt
 /src/po/pkg.pot
@@ -23,4 +22,4 @@
 /src/cffi_src/src
 /src/tests/failures
 /src/tests/failures.3*
-src/pkg.egg-info/
+/src/zoneproxy/**/*.o

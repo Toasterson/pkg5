@@ -26,14 +26,10 @@
 <transform file path=$(PYDIRVP)/pkg/solver -> \
     set pkg.depend.bypass-generate libm.so.0>
 #
-<include bundledlicences.3.13.core.p5m>
-<include bundledmodules.3.13.core.p5m>
 set name=pkg.fmri value=pkg:/package/pkg@$(PKGVERS)
-set name=pkg.summary value="Image Packaging System - pkg(7)"
+set name=pkg.summary value="Image Packaging System"
 set name=pkg.description \
-    value="The Image Packaging System (IPS), or pkg(7), is the software delivery system used on OmniOS."
-set name=pkg.depend.runpath \
-    value=/usr/lib/pkg/python$(PYVERS):$PKGDEPEND_RUNPATH
+    value="The Image Packaging System (IPS), or pkg(7), is the software delivery system used on OpenIndiana.  This package contains the core command-line components and pkg.depotd server."
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Packaging
 set name=variant.arch value=$(ARCH)
@@ -41,16 +37,16 @@ dir  path=$(PYDIR)
 dir  path=$(PYDIRVP)
 dir  path=$(PYDIRVP)/pkg
 file path=$(PYDIRVP)/pkg/__init__.py
-file path=$(PYDIRVP)/pkg/_arch.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/_misc.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/_sha512_t.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/_sysattr.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/_syscallat.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/_varcet.cpython$(PYPKGVERS)-$(TRIPLE).so
+file path=$(PYDIRVP)/pkg/_arch$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/_misc$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/_sha512_t$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/_sysattr$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/_syscallat$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/_varcet$(PYEXTSUFFIX)
 dir  path=$(PYDIRVP)/pkg/actions
 file path=$(PYDIRVP)/pkg/actions/__init__.py
-file path=$(PYDIRVP)/pkg/actions/_actions.cpython$(PYPKGVERS)-$(TRIPLE).so
-file path=$(PYDIRVP)/pkg/actions/_common.cpython$(PYPKGVERS)-$(TRIPLE).so
+file path=$(PYDIRVP)/pkg/actions/_actions$(PYEXTSUFFIX)
+file path=$(PYDIRVP)/pkg/actions/_common$(PYEXTSUFFIX)
 file path=$(PYDIRVP)/pkg/actions/attribute.py
 file path=$(PYDIRVP)/pkg/actions/depend.py
 file path=$(PYDIRVP)/pkg/actions/directory.py
@@ -123,7 +119,7 @@ file path=$(PYDIRVP)/pkg/config.py
 file path=$(PYDIRVP)/pkg/cpiofile.py
 file path=$(PYDIRVP)/pkg/dependency.py
 file path=$(PYDIRVP)/pkg/digest.py
-file path=$(PYDIRVP)/pkg/elf.cpython$(PYPKGVERS)-$(TRIPLE).so
+file path=$(PYDIRVP)/pkg/elf$(PYEXTSUFFIX)
 file path=$(PYDIRVP)/pkg/facet.py
 dir  path=$(PYDIRVP)/pkg/file_layout
 file path=$(PYDIRVP)/pkg/file_layout/__init__.py
@@ -194,7 +190,7 @@ file path=$(PYDIRVP)/pkg/sha512_t.py
 dir  path=$(PYDIRVP)/pkg/site_paths
 file path=$(PYDIRVP)/pkg/site_paths/__init__.py
 file path=$(PYDIRVP)/pkg/smf.py
-file path=$(PYDIRVP)/pkg/solver.cpython$(PYPKGVERS)-$(TRIPLE).so
+file path=$(PYDIRVP)/pkg/solver$(PYEXTSUFFIX)
 file path=$(PYDIRVP)/pkg/sysattr.py
 file path=$(PYDIRVP)/pkg/syscallat.py
 file path=$(PYDIRVP)/pkg/sysvpkg.py
@@ -257,16 +253,16 @@ file path=usr/share/lib/pkg/web/_themes/default/en/footer.shtml
 file path=usr/share/lib/pkg/web/_themes/default/en/head_end.shtml
 file path=usr/share/lib/pkg/web/_themes/default/en/header.shtml
 file path=usr/share/lib/pkg/web/_themes/default/feed-icon-14x14.png
-dir  path=usr/share/lib/pkg/web/_themes/omnios.org
-dir  path=usr/share/lib/pkg/web/_themes/omnios.org/en
-file path=usr/share/lib/pkg/web/_themes/omnios.org/en/base.css
-file path=usr/share/lib/pkg/web/_themes/omnios.org/en/body_end.shtml
-file path=usr/share/lib/pkg/web/_themes/omnios.org/en/footer.shtml
-file path=usr/share/lib/pkg/web/_themes/omnios.org/en/head_end.shtml
-file path=usr/share/lib/pkg/web/_themes/omnios.org/en/header.shtml
-file path=usr/share/lib/pkg/web/_themes/omnios.org/feed-icon-14x14.png
-file path=usr/share/lib/pkg/web/_themes/omnios.org/logo_ban0.png
-file path=usr/share/lib/pkg/web/_themes/omnios.org/logo_ban0.svg
+dir  path=usr/share/lib/pkg/web/_themes/openindiana.org
+dir  path=usr/share/lib/pkg/web/_themes/openindiana.org/en
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/en/base.css
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/en/body_end.shtml
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/en/footer.shtml
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/en/head_end.shtml
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/en/header.shtml
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/favicon.ico
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/feed-icon-14x14.png
+file path=usr/share/lib/pkg/web/_themes/openindiana.org/openindiana.jpg
 file path=usr/share/lib/pkg/web/_themes/p5i-link.png
 file path=usr/share/lib/pkg/web/_themes/pkg-block-icon.png
 file path=usr/share/lib/pkg/web/_themes/pkg-block-logo.png
@@ -284,7 +280,6 @@ file path=usr/share/lib/pkg/web/en/stats.shtml
 file path=usr/share/lib/pkg/web/index.shtml
 file path=usr/share/lib/pkg/web/robots.txt
 file path=usr/share/lib/pkg/web/shared.shtml
-dir  path=usr/share/locale
 dir  path=usr/share/locale
 dir  path=usr/share/locale/__LOCALE__
 dir  path=usr/share/locale/__LOCALE__/LC_MESSAGES
@@ -353,6 +348,40 @@ dir  path=usr/share/locale/zh_TW
 dir  path=usr/share/locale/zh_TW/LC_MESSAGES
 file path=usr/share/locale/zh_TW/LC_MESSAGES/pkg.mo
 dir  path=usr/share/man
+dir  path=usr/share/man/ja_JP.UTF-8
+dir  path=usr/share/man/ja_JP.UTF-8/man1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkg.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgdepend.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgdiff.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgfmt.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkglint.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgmerge.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgmogrify.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgrecv.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgrepo.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgsend.1
+file path=usr/share/man/ja_JP.UTF-8/man1/pkgsign.1
+dir  path=usr/share/man/ja_JP.UTF-8/man7
+file path=usr/share/man/ja_JP.UTF-8/man7/pkg.7
+dir  path=usr/share/man/ja_JP.UTF-8/man8
+file path=usr/share/man/ja_JP.UTF-8/man8/pkg.depotd.8
+dir  path=usr/share/man/zh_CN.UTF-8
+dir  path=usr/share/man/zh_CN.UTF-8/man1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkg.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgdepend.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgdiff.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgfmt.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkglint.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgmerge.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgmogrify.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgrecv.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgrepo.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgsend.1
+file path=usr/share/man/zh_CN.UTF-8/man1/pkgsign.1
+dir  path=usr/share/man/zh_CN.UTF-8/man7
+file path=usr/share/man/zh_CN.UTF-8/man7/pkg.7
+dir  path=usr/share/man/zh_CN.UTF-8/man8
+file path=usr/share/man/zh_CN.UTF-8/man8/pkg.depotd.8
 dir  path=usr/share/man/man1
 file path=usr/share/man/man1/pkg.1
 file path=usr/share/man/man1/pkgdepend.1
@@ -402,9 +431,14 @@ license lic_minisat license="MIT (MiniSAT)" \
     com.oracle.info.tpno=17867 com.oracle.info.version=1.14.1
 license cr_Oracle license=cr_Oracle
 # CFFI import is done in C code, so it isn't picked up by pkgdepend
-depend type=require fmri=library/python-3/cffi$(PYPKGVERS)
+depend type=require fmri=library/python/cffi$(PYPKGVERS)
 # CherryPy requires setuptools from system
-depend type=require fmri=library/python-3/setuptools$(PYPKGVERS)
+depend type=require fmri=library/python/setuptools$(PYPKGVERS)
 depend type=require fmri=system/library/python/libbe$(PYPKGVERS)
-depend type=require fmri=web/ca-bundle
+depend type=require fmri=crypto/ca-certificates
+depend type=require fmri=library/python/portend$(PYPKGVERS)
+depend type=require fmri=library/python/prettytable$(PYPKGVERS)
+depend type=require fmri=locale/en
+depend type=group fmri=package/pkg/zones-proxy \
+    variant.opensolaris.zone=nonglobal
 

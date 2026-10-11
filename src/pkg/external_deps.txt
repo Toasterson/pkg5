@@ -1,47 +1,52 @@
-    #
-    pkg:/runtime/python-313
-    pkg:/library/python-3/cffi-313
-    pkg:/library/python-3/coverage-313
-    pkg:/library/python-3/cryptography-313
-    pkg:/library/python-3/jsonrpclib-313
-    pkg:/library/python-3/jsonschema-313
-    pkg:/library/python-3/pybonjour-313
-    pkg:/library/python-3/pycurl-313
-    pkg:/library/python-3/rapidjson-313
-    pkg:/library/python-3/setuptools-313
-    #
-    pkg:/system/library/python/libbe-313
-    #
     pkg:/SUNWcs
     pkg:/archiver/gnu-tar
+    pkg:/crypto/ca-certificates
     pkg:/developer/build/make
     pkg:/developer/build/onbld
-    pkg:/driver/virtualization/kvm
-    pkg:/library/libffi
-    pkg:/library/security/openssl-3
-    pkg:/media/cdrtools
+    pkg:/developer/build/pkg-config
+    pkg:/gnome/gnome-common
+    pkg:/library/python/cffi-314
+    pkg:/library/python/cherrypy-314
+    pkg:/library/python/coverage-314
+    pkg:/library/python/cryptography-314
+    pkg:/library/python/jsonrpclib-pelix-314
+    pkg:/library/python/jsonschema-314
+    pkg:/library/python/mako-314
+    pkg:/library/python/ply-314
+    pkg:/library/python/portend-314
+    pkg:/library/python/prettytable-314
+    pkg:/library/python/pybonjour-314
+    pkg:/library/python/pycurl-314
+    pkg:/library/python/pylint
+    pkg:/library/python/python-rapidjson-314
+    pkg:/library/python/pyyaml-314
+    pkg:/library/python/setuptools-314
+    pkg:/locale/en
     pkg:/network/netcat
     pkg:/package/svr4
+    pkg:/runtime/python-314
     pkg:/service/network/dns/mdns
     pkg:/shell/bash
     pkg:/shell/ksh93
     pkg:/system/bhyve
-    pkg:/system/file-system/zfs
+    pkg:/system/bhyve/firmware
     pkg:/system/header
-    pkg:/system/kvm
     pkg:/system/library
+    pkg:/system/library/bhyve
     pkg:/system/library/dbus
-    pkg:/system/library/gcc-runtime
+    pkg:/system/library/gcc-14-runtime
     pkg:/system/library/math
+    pkg:/system/library/python/libbe-314
     pkg:/system/library/security/crypto
     pkg:/system/network
+    pkg:/system/qemu/kvm
     pkg:/system/zones
     pkg:/text/gnu-diffutils
     pkg:/text/gnu-gettext
     pkg:/text/gnu-grep
+    pkg:/text/intltool
     pkg:/text/locale
-    pkg:/web/ca-bundle
-    pkg:/web/curl
-    #
-    pkg://extra.omnios/ooce/emulator/qemu
-
+    pkg:/text/tidy
+    pkg:/web/server/apache-24
+    pkg:/web/server/apache-24/module/apache-wsgi-314
+    pkg:/web/wget
